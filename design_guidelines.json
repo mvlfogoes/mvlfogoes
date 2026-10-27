@@ -1,0 +1,181 @@
+{
+  "project_title": "MVL Fogões - Gestão Técnica & CRM Futurista",
+  "theme_strategy": {
+    "mode": "dark_futuristic_fire",
+    "concept": "Performance Pro Cyber-Tactical with Fire Identity",
+    "archetype": "ARCHETYPE 2 & 7 Hybrid (Cyber-Tactical Performance & Glowing Flame Accents)",
+    "target_audience": "Técnico especialista em manutenção/conversão de fogões e cooktops (Mobile-First / PWA & Desktop Dashboard)",
+    "language": "pt-BR"
+  },
+  "typography": {
+    "heading_font": "Outfit, Barlow Condensed, sans-serif",
+    "body_font": "Inter, system-ui, sans-serif",
+    "mono_font": "JetBrains Mono, monospace",
+    "font_sources": [
+      "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800;900&display=swap"
+    ],
+    "scale": {
+      "h1": "text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-outfit",
+      "h2": "text-2xl sm:text-3xl font-bold tracking-tight font-outfit",
+      "h3": "text-xl sm:text-2xl font-semibold font-outfit",
+      "h4": "text-lg font-semibold font-outfit",
+      "body": "text-sm sm:text-base leading-relaxed font-sans",
+      "caption": "text-xs font-mono tracking-wider uppercase text-zinc-400"
+    }
+  },
+  "colors": {
+    "background_primary": "#0A0B10",
+    "background_secondary": "#12141D",
+    "background_card": "rgba(20, 24, 35, 0.75)",
+    "background_card_hover": "rgba(30, 35, 50, 0.85)",
+    "border_subtle": "rgba(255, 120, 0, 0.15)",
+    "border_glow": "rgba(255, 85, 0, 0.5)",
+    "fire_orange_primary": "#FF5500",
+    "fire_amber_accent": "#FF8800",
+    "fire_flame_yellow": "#FFCC00",
+    "cyber_neon_cyan": "#00E5FF",
+    "status_success": "#10B981",
+    "status_warning": "#F59E0B",
+    "status_danger": "#EF4444",
+    "status_info": "#3B82F6",
+    "text_primary": "#F4F4F5",
+    "text_secondary": "#A1A1AA",
+    "text_muted": "#71717A",
+    "gradients": {
+      "fire_glow_button": "linear-gradient(135deg, #FF3300 0%, #FF8800 100%)",
+      "fire_border_beam": "linear-gradient(90deg, rgba(255,85,0,0.8) 0%, rgba(255,204,0,0.8) 50%, rgba(255,85,0,0.8) 100%)",
+      "hero_radial_flare": "radial-gradient(circle at 50% 0%, rgba(255, 85, 0, 0.25) 0%, rgba(10, 11, 16, 0) 70%)"
+    }
+  },
+  "layout_and_navigation": {
+    "layout_mode": "Hybrid Mobile-First Bottom Nav + Desktop Glass Sidebar",
+    "mobile_bottom_nav": {
+      "visible_breakpoints": "block md:hidden",
+      "position": "fixed bottom-0 left-0 right-0 z-50",
+      "style": "bg-black/80 backdrop-blur-xl border-t border-orange-500/20 px-3 py-2 flex justify-around items-center text-zinc-400 shadow-[0_-8px_25px_rgba(255,85,0,0.15)]",
+      "active_item_style": "text-orange-500 bg-orange-500/10 rounded-xl px-3 py-1.5 font-bold shadow-[0_0_12px_rgba(255,85,0,0.3)] transition-all scale-105"
+    },
+    "desktop_sidebar": {
+      "visible_breakpoints": "hidden md:flex flex-col w-64 fixed top-0 bottom-0 left-0 z-40",
+      "style": "bg-[#0A0B10]/90 backdrop-blur-xl border-r border-orange-500/15 p-5 shadow-[5px_0_30px_rgba(0,0,0,0.5)]"
+    },
+    "top_header": {
+      "style": "sticky top-0 z-30 bg-[#0A0B10]/80 backdrop-blur-md border-b border-orange-500/15 px-4 md:px-8 py-4 flex justify-between items-center"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-xl bg-zinc-900/60 border border-orange-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.4)]",
+    "neon_glow_card": "hover:border-orange-500/60 hover:shadow-[0_0_20px_rgba(255,85,0,0.25)] transition-all duration-300",
+    "flame_icon_badge": "p-2 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/10 border border-orange-500/30 text-orange-400 drop-shadow-[0_0_8px_rgba(255,85,0,0.5)]",
+    "data_metric_card": "relative overflow-hidden rounded-2xl bg-zinc-900/70 border border-orange-500/20 p-5 backdrop-blur-md group hover:border-orange-500/50 transition-all"
+  },
+  "modules_and_key_functionalities": [
+    {
+      "tab": "dashboard",
+      "name_pt": "Início / Dashboard",
+      "features": [
+        "Cards de métricas rápidas (OS Abertas, Clientes Ativos, Mídias Salvas, Mensagens WhatsApp)",
+        "Atalhos de Ação Rápida (Nova OS, Novo Cliente, Enviar WhatsApp, Agendar Visita)",
+        "Feed de OS Recentes com badges neon de status (Pendente, Em Andamento, Concluída, Aguardando Peça)",
+        "Gráfico rápido de faturamento/atendimentos no mês (Recharts com gradiente laranja/âmbar)"
+      ]
+    },
+    {
+      "tab": "clientes",
+      "name_pt": "Gestão de Clientes",
+      "features": [
+        "Lista de clientes com busca por Nome, Telefone, Bairro ou Endereço",
+        "Filtro por categoria (Residencial, Restaurante/Comercial, Condomínio)",
+        "Modal de Cadastro/Edição de Cliente com busca CEP simulada / auto-preenchimento",
+        "Visualização detalhada do Histórico de OS e mídias atreladas ao cliente"
+      ]
+    },
+    {
+      "tab": "os",
+      "name_pt": "Ordens de Serviço (OS)",
+      "features": [
+        "Kanban/Lista de OS com abas por status (Todas, Abertas, Em Orçamento, Em Andamento, Finalizadas, Canceladas)",
+        "Formulário dinâmico de Nova OS (Cliente, Tipo de Fogão/Cooktop, Marca, Defeito relatado, Peças trocadas, Valor Mão de Obra, Valor Peças, Garantia)",
+        "Visualizador & Gerador de Comprovante de OS em Formato Impressão/PDF Futurista",
+        "Busca e ordenação por data de criação ou prioridade (Normal, Urgente, Garantia)"
+      ]
+    },
+    {
+      "tab": "agenda",
+      "name_pt": "Agenda de Atendimentos",
+      "features": [
+        "Visualizações alternáveis: Mês, Semana, Lista do Dia",
+        "Status de confirmação da visita (Agendado, A caminho, Concluído, Reagendado)",
+        "Botão direto 'Navegar Waze/Google Maps' com endereço do cliente",
+        "Adicionar novo compromisso vinculado ao cliente/OS"
+      ]
+    },
+    {
+      "tab": "midias",
+      "name_pt": "Galeria de Mídias",
+      "features": [
+        "Galeria de Fotos/Vídeos organizados por Cliente e OS (Antes e Depois da manutenção)",
+        "Filtros rápidos (Fotos do Defeito, Fotos do Conserto, Placa de Identificação do Fogão)",
+        "Upload simulado com drag-and-drop e visualização em Lightbox futurista"
+      ]
+    },
+    {
+      "tab": "whatsapp",
+      "name_pt": "Central WhatsApp",
+      "features": [
+        "Lista de conversas rápidas e templates de mensagens prontas em português (ex: Orçamento Pronto, Técnico a Caminho, Manutenção Concluída, Pesquisa de Satisfação)",
+        "Link direto wa.me com mensagem pré-formatada",
+        "Status de envio e botão de disparo imediato"
+      ]
+    },
+    {
+      "tab": "garantias",
+      "name_pt": "Controle de Garantias",
+      "features": [
+        "Lista de garantias ativas (30 dias, 60 dias, 90 dias, 6 meses)",
+        "Alerta visual neon para garantias prestes a vencer (menos de 7 dias)",
+        "Filtro de busca por OS ou nome do cliente"
+      ]
+    },
+    {
+      "tab": "relatorios",
+      "name_pt": "Relatórios & Métricas",
+      "features": [
+        "Resumo financeiro mensal (Total faturado, Custo de peças, Lucro líquido)",
+        "Gráfico comparativo por marca de fogão mais atendida (Brastemp, Consul, Dako, Fischer, Electrolux, Tramontina, Suggar)",
+        "Média de tempo de atendimento e taxa de conversão de orçamentos"
+      ]
+    },
+    {
+      "tab": "configuracoes",
+      "name_pt": "Configurações do Sistema",
+      "features": [
+        "Dados do Técnico / Empresa (Nome MVL Fogões, CNPJ, Telefone, Chave PIX, Logotipo)",
+        "Backup de dados local (Exportar banco JSON e Importar JSON)",
+        "Configuração de valores padrão de visita e termos de garantia"
+      ]
+    }
+  ],
+  "image_urls": {
+    "flame_background_hero": "https://images.unsplash.com/photo-1510772314292-9c0ad420734a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzR8MHwxfHNlYXJjaHwzfHxmbGFtZSUyMGZpcmUlMjBuZW9uJTIwYWJzdHJhY3QlMjBiYWNrZ3JvdW5kJTIwb3JhbmdlfGVufDB8fHx8MTc5MzA2NDg5Mnww&ixlib=rb-4.1.0&q=85",
+    "flame_abstract_overlay": "https://images.unsplash.com/photo-1530982011887-3cc11cc85693?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzR8MHwxfHNlYXJjaHwxfHxmbGFtZSUyMGZpcmUlMjBuZW9uJTIwYWJzdHJhY3QlMjBiYWNrZ3JvdW5kJTIwb3JhbmdlfGVufDB8fHx8MTc5MzA2NDg5Mnww&ixlib=rb-4.1.0&q=85",
+    "stove_cooktop_blue_flame": "https://images.unsplash.com/photo-1607324772107-8ad6740ca195?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODF8MHwxfHNlYXJjaHwxfHxnYXMlMjBzdG92ZSUyMHRlY2huaWNpYW4lMjByZXBhaXIlMjBraXRjaGVuJTIwYXBwbGlhbmNlfGVufDB8fHx8MTc5MzA2NDg5Mnww&ixlib=rb-4.1.0&q=85",
+    "stove_modern_glass": "https://images.unsplash.com/photo-1608454770647-01dc0f7dd97d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODl8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBsdXh1cnklMjBnYXMlMjBjb29rdG9wJTIwa2l0Y2hlbiUyMGZsYW1lfGVufDB8fHx8MTc5MzA2NDg5NXww&ixlib=rb-4.1.0&q=85",
+    "stove_kitchen_range": "https://images.unsplash.com/photo-1623114112815-74a4b9fe505d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODF8MHwxfHNlYXJjaHw0fHxnYXMlMjBzdG92ZSUyMHRlY2huaWNpYW4lMjByZXBhaXIlMjBraXRjaGVuJTIwYXBwbGlhbmNlfGVufDB8fHx8MTc5MzA2NDg5Mnww&ixlib=rb-4.1.0&q=85",
+    "stove_stainless_cooktop": "https://images.unsplash.com/photo-1629234358103-5b5ee53ece9c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODl8MHwxfHNlYXJjaHw0fHxtb2Rlcm4lMjBsdXh1cnklMjBnYXMlMjBjb29rdG9wJTIwa2l0Y2hlbiUyMGZsYW1lfGVufDB8fHx8MTc5MzA2NDg5NXww&ixlib=rb-4.1.0&q=85"
+  },
+  "instructions_to_main_agent": [
+    "Usar obrigatoriamente .js para componentes React (sem TypeScript .tsx).",
+    "Garantir que todas as interações tenham micro-animações com framer-motion ou Tailwind transitions.",
+    "Utilizar Lucide icons (ou Lucide-react) com visual em tons de laranja neon (#FF5500) ou âmbar (#FF8800).",
+    "Adicionar data-testid em todos os botões, links, abas, inputs e cards principais.",
+    "O aplicativo deve iniciar diretamente na tela principal (sem exigência de tela de login).",
+    "Manter dados mockados ricos em localStorage com persistência para criar/editar/excluir Clientes, OS, Agenda e Mídias de forma totalmente dinâmica e sem bugs.",
+    "Permitir exportação do comprovante da Ordem de Serviço em janela imprimível ou modal bem estilizado.",
+    "Implementar botões funcionais do WhatsApp com wa.me e mensagens pré-definidas em português."
+  ],
+  "testing_and_accessibility": {
+    "data_testid_convention": "kebab-case, como data-testid='nav-dashboard-button', data-testid='os-status-filter-pendente', data-testid='client-add-new-btn'",
+    "contrast_standards": "Texto claro (#F4F4F5) com contraste mínimo de 4.5:1 sobre fundos escuros (#0A0B10 / #12141D)."
+  }
+}

@@ -1,0 +1,26 @@
+# MVL Fogões — Sistema de Gestão para Assistência Técnica
+
+## O que é
+Um aplicativo web de gestão para uma empresa de fogões (venda, instalação e conserto),
+reconstruído a partir do código enviado, agora com dados salvos no servidor.
+
+## Para quem é
+O técnico/dono da MVL Fogões, usado no celular ou computador para controlar
+clientes, serviços, agenda e comunicação no dia a dia.
+
+## Funcionalidades principais e experiência
+- **Início**: resumo com números-chave (OS abertas, clientes, mídias, mensagens) e atalhos rápidos.
+- **Clientes**: cadastro com nome, telefone, WhatsApp, endereço, modelo do fogão, etiqueta e observações; busca e edição.
+- **Ordens de Serviço (OS)**: criação e acompanhamento com serviço, problema, peças, valor, garantia, data, status e observações; filtros (todas, pendentes, concluídas, em garantia) e busca.
+- **Agenda**: visualização por mês, semana e lista; novos agendamentos com data, hora, serviço, status e fotos; marcar como concluído/cancelado.
+- **Mídias**: upload e galeria de fotos e vídeos ligados a cada cliente (salvos no banco de dados).
+- **WhatsApp**: lista de conversas e envio via link direto `wa.me`, abrindo o WhatsApp já com número e mensagem prontos (recibos, confirmações).
+- **Garantias**: lista de garantias ativas calculadas a partir das OS.
+- **Relatórios**: resumo mensal (visitas, clientes atendidos, valor recebido).
+- **Configurações**: nome do técnico, informações do app e backup/exportação dos dados.
+- **Visual**: tema escuro futurista com detalhes em fogo/laranja — efeitos de néon, vidro e animações; sem necessidade de login, abre direto no app.
+
+## Fase 1: o que será construído agora
+App completo com todas as funcionalidades acima — Início, Clientes, OS, Agenda, Mídias,
+WhatsApp (link wa.me), Garantias, Relatórios e Configurações — com dados persistidos no
+servidor e visual escuro futurista, acesso direto sem login.
