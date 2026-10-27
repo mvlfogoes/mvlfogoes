@@ -128,3 +128,23 @@ def test_midias_crud(s, cliente):
     m = s.post(f"{API}/midias", json={"cliId": cliente["id"], "dataUrl": "data:image/png;base64,AAA", "label": "TEST"}).json()
     assert any(x["id"] == m["id"] for x in s.get(f"{API}/midias", params={"cliId": cliente["id"]}).json())
     s.delete(f"{API}/midias/{m['id']}")
+
+
+# Iteration 2: validation + timezone fixes
+def test_create_empty_nome_422(s):
+    r = s.post(f"{BASE_URL}/api/clientes", json={"nome": ""})
+    assert r.status_code == 422
+
+
+def test_stats_ag_hoje_uses_brt(s):
+    from datetime import datetime, timezone, timedelta
+    hoje = datetime.now(timezone(timedelta(hours=-3))).strftime("%Y-%m-%d")
+    before = s.get(f"{BASE_URL}/api/stats").json()["ag_hoje"]
+    r = s.post(f"{BASE_URL}/api/agendamentos", json={"nomeCli": "TEST_tz", "data": hoje, "hora": "10:00", "status": "agendado"})
+    assert r.status_code in (200, 201)
+    aid = r.json()["id"]
+    try:
+        after = s.get(f"{BASE_URL}/api/stats").json()["ag_hoje"]
+        assert after == before + 1
+    finally:
+        s.delete(f"{BASE_URL}/api/agendamentos/{aid}")

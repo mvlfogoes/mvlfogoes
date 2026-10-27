@@ -54,7 +54,7 @@ export function buildFlyerText(f, cfg) {
 }
 
 const lbl = { fontWeight: 800, fontSize: 11, color: "#FF6A00", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 };
-const val = { width: "100%", border: "none", borderBottom: "1px dashed #c9c2b8", background: "transparent", fontSize: 14, fontWeight: 600, color: "#1a1a1a", padding: "2px 0 3px", outline: "none", fontFamily: "Inter, sans-serif", minHeight: 22, lineHeight: "18px" };
+const val = { width: "100%", border: "none", borderBottom: "1px dashed #c9c2b8", background: "transparent", fontSize: 14, fontWeight: 600, color: "#1a1a1a", padding: "2px 0 5px", outline: "none", fontFamily: "Inter, sans-serif", minHeight: 22, lineHeight: "18px" };
 
 const Field = ({ label, k, f, set, cap, flex = 1, testid }) => (
   <div style={{ flex, minWidth: 0 }}>
@@ -65,7 +65,7 @@ const Field = ({ label, k, f, set, cap, flex = 1, testid }) => (
 );
 
 const Header = ({ cfg }) => (
-  <div style={{ background: "#1c1a18", color: "#fff", padding: "18px 16px 14px", textAlign: "center" }}>
+  <div style={{ background: "#1c1a18", color: "#fff", padding: "14px 16px 12px", textAlign: "center" }}>
     <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800, fontSize: 36, lineHeight: 1 }}>
       MVL <span style={{ color: "#FF6A00" }}>FOGÕES</span>
     </div>
@@ -73,9 +73,9 @@ const Header = ({ cfg }) => (
     <div style={{ fontSize: 9, letterSpacing: 2, color: "#cfcfcf", marginTop: 2 }}>ASSISTÊNCIA TÉCNICA ESPECIALIZADA</div>
     <div style={{ color: "#FF8A3C", fontWeight: 700, fontSize: 11, marginTop: 6 }}>{(cfg.slogan || "Qualidade que dá confiança!").toUpperCase()}</div>
     <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: 8, fontSize: 10, fontWeight: 700 }}>
-      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><ShieldCheck size={12} color="#FF8A3C" style={{ display: "block", flexShrink: 0 }} /> SEGURANÇA</span>
-      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Star size={12} color="#FFCC00" style={{ display: "block", flexShrink: 0 }} /> QUALIDADE</span>
-      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Handshake size={12} color="#FF8A3C" style={{ display: "block", flexShrink: 0 }} /> CONFIANÇA</span>
+      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><ShieldCheck size={12} color="#FF8A3C" data-ico="1" style={{ display: "block", flexShrink: 0 }} /> SEGURANÇA</span>
+      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Star size={12} color="#FFCC00" data-ico="1" style={{ display: "block", flexShrink: 0 }} /> QUALIDADE</span>
+      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Handshake size={12} color="#FF8A3C" data-ico="1" style={{ display: "block", flexShrink: 0 }} /> CONFIANÇA</span>
     </div>
   </div>
 );
@@ -85,9 +85,9 @@ const Solucoes = ({ cfg }) => {
   return (
     <div style={{ background: "#faf6f0", padding: "8px 14px", textAlign: "center" }}>
       <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
-        {sol.map(([I, t]) => <span key={t} style={{ display: "flex", alignItems: "center", gap: 3, fontWeight: 800, fontSize: 10 }}><I size={11} color="#FF6A00" style={{ display: "block", flexShrink: 0 }} />{t}</span>)}
+        {sol.map(([I, t]) => <span key={t} style={{ display: "flex", alignItems: "center", gap: 3, fontWeight: 800, fontSize: 10 }}><I size={11} color="#FF6A00" data-ico="1" style={{ display: "block", flexShrink: 0 }} />{t}</span>)}
       </div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5, color: "#FF6A00", fontWeight: 800, fontSize: 15, marginTop: 4 }}><Phone size={13} style={{ display: "block", flexShrink: 0 }} /> FALE CONOSCO: {cfg.telefone || "(32) 98885-6030"}</div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5, color: "#FF6A00", fontWeight: 800, fontSize: 15, marginTop: 4 }}><Phone size={13} data-ico="1" style={{ display: "block", flexShrink: 0 }} /> FALE CONOSCO: {cfg.telefone || "(32) 98885-6030"}</div>
     </div>
   );
 };
@@ -103,7 +103,7 @@ const Servicos = ({ f, set, cap }) => (
             <span style={{ width: 17, height: 17, boxSizing: "border-box", borderRadius: 4, border: "2px solid #FF6A00", padding: 2, background: "#fff", flexShrink: 0 }}>
               {on && <span style={{ display: "block", width: "100%", height: "100%", borderRadius: 2, background: "#FF6A00" }} />}
             </span>
-            <span style={{ display: "block", lineHeight: "17px" }}>{t.label}</span>
+            <span data-lbl="1" style={{ display: "block", lineHeight: "17px" }}>{t.label}</span>
           </span>
         );
       })}
@@ -112,12 +112,12 @@ const Servicos = ({ f, set, cap }) => (
 );
 
 const Obs = ({ f, set, cap }) => {
-  const box = { ...val, fontSize: 12, fontWeight: 500, color: "#333", lineHeight: "17px", border: "1px solid #e4ded5", borderRadius: 8, padding: 8, height: 92, boxSizing: "border-box", resize: "none", whiteSpace: "pre-wrap", overflow: "hidden", display: "block" };
+  const box = { ...val, fontSize: 12, fontWeight: 500, color: "#333", lineHeight: "17px", border: "1px solid #e4ded5", borderRadius: 8, padding: 8, height: "100%", borderBottom: "1px solid #e4ded5", boxSizing: "border-box", resize: "none", whiteSpace: "pre-wrap", overflow: "hidden", display: "block" };
   return (
-    <div>
+    <div style={{ flex: 1, minHeight: 60, display: "flex", flexDirection: "column" }}>
       <div style={{ ...lbl, marginBottom: 5 }}>Observações</div>
-      {cap ? <div style={box}>{f.obs}</div>
-        : <textarea data-testid="flyer-input-obs" value={f.obs} onChange={(e) => set({ ...f, obs: e.target.value })} style={box} />}
+      {cap ? <div style={{ ...box, flex: 1 }}>{f.obs}</div>
+        : <textarea data-testid="flyer-input-obs" maxLength={200} value={f.obs} onChange={(e) => set({ ...f, obs: e.target.value })} style={{ ...box, flex: 1 }} />}
     </div>
   );
 };
@@ -137,10 +137,9 @@ const Flyer = ({ f, set, cfg, cap, innerRef }) => {
     <div ref={innerRef} data-testid="flyer-canvas" style={{ width: W, height: H, background: "#fff", fontFamily: "Inter, sans-serif", color: "#1a1a1a", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <Header cfg={cfg} />
       <Solucoes cfg={cfg} />
-      <div style={{ flex: 1, padding: "14px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ flex: 1, padding: "14px 18px", display: "flex", flexDirection: "column", gap: 9, minHeight: 0 }}>
         <div style={{ display: "flex", gap: 14 }}><Field label="Cliente" k="nome" flex={1.4} testid="flyer-input-nome" {...p} /><Field label="Telefone" k="tel" testid="flyer-input-tel" {...p} /></div>
-        <Field label="Endereço" k="end" testid="flyer-input-end" {...p} />
-        <Field label="Cidade" k="cidade" testid="flyer-input-cidade" {...p} />
+        <div style={{ display: "flex", gap: 14 }}><Field label="Endereço" k="end" flex={1.6} testid="flyer-input-end" {...p} /><Field label="Cidade" k="cidade" testid="flyer-input-cidade" {...p} /></div>
         <div style={{ display: "flex", gap: 14, background: "#fff4ea", borderRadius: 10, padding: "8px 10px" }}><Field label="Data da visita" k="data" testid="flyer-input-data" {...p} /><Field label="Horário" k="hora" testid="flyer-input-hora" {...p} /></div>
         <Servicos {...p} />
         <div style={{ display: "flex", gap: 14 }}><Field label="Detalhe do serviço" k="servico" flex={1.4} testid="flyer-input-servico" {...p} /><Field label="Taxa de visita" k="taxa" testid="flyer-input-taxa" {...p} /></div>
@@ -177,7 +176,12 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg }) {
     try {
       const canvas = await html2canvas(ref.current, {
         scale: 3, backgroundColor: "#ffffff", useCORS: true, width: W, height: H,
-        onclone: (doc) => { doc.querySelector('[data-testid="flyer-canvas"]').parentElement.style.transform = "none"; },
+        onclone: (doc) => {
+          doc.querySelector('[data-testid="flyer-canvas"]').parentElement.style.transform = "none";
+          const st = doc.createElement("style");
+          st.textContent = "[data-ico]{position:relative;top:2px}[data-lbl]{position:relative;top:-3px}";
+          doc.head.appendChild(st);
+        },
       });
       return await new Promise((r) => canvas.toBlob(r, "image/png"));
     } finally {

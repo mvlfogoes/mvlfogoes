@@ -45,6 +45,7 @@ class Cliente(BaseModel):
 
 
 class ClienteCreate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
     nome: str = Field(min_length=1)
     tel: str = ""
     wa: str = ""

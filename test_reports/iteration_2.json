@@ -1,0 +1,44 @@
+{
+  "summary": "Retest of iteration_1 fixes. Backend: 16/16 pytest passed, including 2 new tests: empty nome gives 422, and /api/stats ag_hoje uses the UTC-3 date. Frontend (mobile 390x844 and desktop): passed — mobile-config-button opens Config and saving gives 200; os-receipt-btn opens api.whatsapp.com/send with OS fields containing '%' ('50% desconto', '100% queimado', 'Valvula %20') with no URIError; in the flyer-send-btn fallback the text keeps the emojis (🔥 present, no U+FFFD) and includes the edited name and the selected tipo 'Cooktop'; hoje() gives the local date (2026-10-27); the new Agenda testids work for create/edit/cancel/delete; flyer open/edit/close works; no page errors. flyer-download-btn makes a 1215x2160 PNG with the edited name, address, obs and the filled orange checkbox for Cooktop. New REGRESSION: the footer is clipped out of the flyer, both on screen and in the PNG.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST/PUT /api/clientes", "issue": "nome '   ' (whitespace only) is still accepted with 200, because min_length=1 does not strip spaces. Add str_strip_whitespace or a validator."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "FlyerModal Flyer layout", "issue": "REGRESSION: the content is taller than H=720. Header 168 + Solucoes 58 + body 496 = 722, so the Footer (offsetTop 721, height 53) is pushed fully outside the overflow:hidden canvas. The footer ('SEGURANÇA EM 1º LUGAR • PEÇAS CERTIFICADAS…' and 'MVL FOGÕES • cidade') is missing from the screen and from the exported PNG. Fix: reduce gaps/obs height (for example obs box height 92 -> ~40-50, or gap 12 -> 8), or give the body minHeight:0 and let obs flex.", "selector": "[data-testid='flyer-canvas']", "priority": "HIGH"},
+      {"component": "FlyerModal Obs (capture mode)", "issue": "The obs box has a fixed height of 92 with overflow hidden. Long or multi-line obs is cut off in the PNG (7 lines: scrollHeight 135 vs clientHeight 90) and the user gets no warning.", "selector": "[data-testid='flyer-input-obs']", "priority": "MEDIUM"},
+      {"component": "FlyerModal enviar() fallback", "issue": "window.open runs after await html2canvas, so on real mobile browsers it can lose user activation and be popup-blocked. Playwright allowed it. Most phones use navigator.share instead, so this is low risk.", "selector": "[data-testid='flyer-send-btn']", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Flyer PNG (html2canvas)", "issues": [
+        "Tipo checkbox squares still render higher than their labels in the PNG (box top lines up with the label cap height, the label text sits lower). It looks better than before but is still visibly offset.",
+        "The header badge icons and the Soluções and phone icons still sit slightly above the text baseline in the PNG.",
+        "The obs box bottom border is still dashed while the other three sides are solid. Cause: in style key order the val.borderBottom from the spread is applied after `border`. Set borderBottom in box explicitly.",
+        "Field value text sits right on its underline in the PNG (descenders touch it). Add about 2px more bottom padding.",
+        "The Observações label no longer overlaps the box: FIXED. The 12px fixed gaps are even: FIXED."
+      ]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_mvl_crm.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Fix the flyer vertical overflow so the Footer fits inside 720px (currently clipped from the screen and the PNG)",
+    "Handle long obs: auto-shrink the font or limit the text length",
+    "Obs box: make the border consistent (override borderBottom)",
+    "Align checkbox squares and icons with their text in the html2canvas output",
+    "Backend: strip whitespace on Cliente nome validation"
+  ],
+  "critical_code_review_comments": [
+    "FlyerModal initForm runs only in the useState initializer. That is fine today because Agenda remounts the modal each time ({flyer && ...}), but it would break if the modal were rendered always-mounted.",
+    "ClienteCreate is reused for PUT, so the whitespace-only nome problem affects updates too."
+  ],
+  "updated_files": ["/app/backend/tests/test_mvl_crm.py"],
+  "success_rate": {"backend": "100%", "frontend": "90% (all listed fixes verified; 1 new layout regression: footer clipped)"},
+  "seed_data_creation": "Temporary OS #1003 with '%' fields, one TEST_AG agendamento and one whitespace-named cliente were created and then deleted. Config slogan restored.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "No auth. Container date is 2026-10-27. Check the footer visibility with: evaluate [data-testid=flyer-canvas] children offsetTop+offsetHeight <= 720. Agenda list view toggle is agenda-view-*; flyer button is agenda-flyer-{id}. Run pytest with REACT_APP_BACKEND_URL exported."
+}
