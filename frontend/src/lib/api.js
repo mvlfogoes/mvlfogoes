@@ -43,10 +43,10 @@ export const fmtData = (d) => {
   return `${day}/${m}/${y}`;
 };
 
-export const hoje = () => new Date().toISOString().slice(0, 10);
+export const hoje = () => new Date().toLocaleDateString("sv-SE");
 
 export const waLink = (tel, msg) => {
   const num = (tel || "").replace(/\D/g, "");
   const full = num.startsWith("55") ? num : `55${num}`;
-  return `https://wa.me/${full}?text=${encodeURIComponent(msg || "")}`;
+  return `https://api.whatsapp.com/send?phone=${full}&text=${encodeURIComponent(msg || "")}`;
 };

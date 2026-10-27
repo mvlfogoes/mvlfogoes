@@ -105,7 +105,8 @@ function App() {
         {/* Mobile header */}
         <header className="md:hidden sticky top-0 z-30 glass border-b border-orange-500/15 px-4 py-3 flex items-center gap-3">
           <div className="flame-badge p-2 rounded-xl"><Flame size={20} /></div>
-          <h1 className="font-cond font-extrabold text-xl fire-text">MVL FOGÕES</h1>
+          <h1 className="font-cond font-extrabold text-xl fire-text flex-1">MVL FOGÕES</h1>
+          <button onClick={() => go("config")} data-testid="mobile-config-button" aria-label="Configurações" className={`p-2 rounded-xl ${tab === "config" ? "text-orange-500 bg-orange-500/10" : "text-zinc-400"}`}><Settings size={20} /></button>
         </header>
 
         <main className="px-4 md:px-8 py-5 md:py-8 max-w-6xl mx-auto">

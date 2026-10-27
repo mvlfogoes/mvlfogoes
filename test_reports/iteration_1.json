@@ -1,0 +1,51 @@
+{
+  "summary": "First full run. Backend: 14/14 pytest passed (clientes/ordens/agendamentos/midias/config CRUD, cascades, 404/422, stats, relatorio, backup). Frontend: Flyer (mobile 390x844) opens, canvas 405x720 scaled to 366x651 with no horizontal overflow; all fields are pre-filled and editable; tipo checkboxes toggle on and off; download gives a 1215x2160 PNG (9:16, scale 3) that includes the edited values; send falls back to download plus a WhatsApp popup; close works. Desktop regression: Dashboard, Clientes CRUD, Ordens CRUD/conclude/delete, Agenda create/edit/conclude/delete, Garantias/Midias/WhatsApp/Config load, Config save all PASS with no page errors. Found: emojis get corrupted in the WhatsApp text because of the wa.me redirect, Config can't be reached on mobile, and the html2canvas PNG has some cosmetic misalignments. Note: there is no /api/garantias endpoint; Garantias are worked out from ordens on the client, which is fine.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/stats", "issue": "ag_hoje uses the UTC date. Brazil is UTC-3, so after 21:00 local time 'Visitas Hoje' counts tomorrow's appointments."},
+      {"endpoint": "/api/clientes POST", "issue": "Accepts an empty nome \"\" (only a missing nome gives 422). No min_length validation."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "lib/api.js waLink (used by FlyerModal, Ordens comprovante, WhatsApp, Clientes)", "issue": "wa.me redirects to api.whatsapp.com/send/ and turns 4-byte emojis (🔥👤📞📍📅⏰🔧💰📝📱) into U+FFFD '�'. Verified: curl -I 'https://wa.me/55..?text=%F0%9F%94%A5' returns Location text=%EF%BF%BD. Every flyer reminder text arrives with broken symbols. Fix: build links as https://api.whatsapp.com/send?phone=${full}&text=${encodeURIComponent(msg)}.", "selector": "[data-testid='flyer-send-btn']", "priority": "HIGH"},
+      {"component": "App.js mobile nav", "issue": "On mobile (PWA) the Config page can't be reached: MOBILE_NAV has no config, the header has no menu, and the Dashboard links only to Midias and Garantias. The user can't edit telefone/cidade/slogan, run backups or see reports on a phone.", "selector": "[data-testid^='mnav-']", "priority": "HIGH"},
+      {"component": "Ordens.js comprovante", "issue": "decodeURIComponent(msg) throws URIError if any OS field has a '%' (e.g. '50% desconto'), so the Comprovante button silently fails. Build the message with \\n and drop the %0A/decode round-trip.", "selector": "[data-testid='os-receipt-btn']", "priority": "MEDIUM"},
+      {"component": "lib/api.js hoje()", "issue": "new Date().toISOString().slice(0,10) is the UTC date. After 21:00 in Brazil the default date for new OS/agendamento and the 'today' highlight in Agenda move to tomorrow. Use the local date.", "selector": "agenda-add-btn", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Flyer PNG output (html2canvas capture)", "issues": [
+        "Lucide icons in the header badges (SEGURANÇA/QUALIDADE/CONFIANÇA), the Soluções row and the phone icon sit higher than their text (baseline misalignment in the exported image only).",
+        "Tipo checkboxes in the PNG sit above their labels, and the ✓ inside the selected box is tiny and pushed to the bottom edge, barely visible.",
+        "The 'OBSERVAÇÕES' label overlaps the top border of the obs box in the PNG, and the box mixes a solid border with a dashed bottom.",
+        "Vertical spacing is uneven (justify-content: space-between): big gaps between Endereço, Cidade and Data, while the Serviço/Detalhe/Observações rows are crammed. Use fixed gaps instead.",
+        "The on-screen flyer looks fine; the problems show up only in the exported image. Consider explicit line-heights/heights on the flex rows, or html-to-image instead of html2canvas."
+      ]},
+      {"screen": "Agenda EvCard", "issues": ["The cancel (X), edit (pencil) and delete (trash) buttons have no data-testid or aria-label (icon-only). The date/time/valor/obs inputs in agenda-modal also have no data-testid."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_mvl_crm.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Switch waLink to https://api.whatsapp.com/send?phone=...&text=... so emojis aren't corrupted",
+    "Make Config reachable on mobile (add it to the bottom nav or a header gear button)",
+    "Remove decodeURIComponent in Ordens comprovante (crashes when a field has '%')",
+    "Use the local date in hoje() (frontend) and in /api/stats ag_hoje (backend: America/Sao_Paulo)",
+    "Fix flyer PNG alignment: icons, checkbox ✓, Observações label overlap, uneven vertical spacing",
+    "Add data-testid/aria-label to the Agenda cancel/edit/delete icon buttons and the modal date/time/valor/obs inputs"
+  ],
+  "critical_code_review_comments": [
+    "FlyerModal: useState(initForm) runs only on mount. That works because Agenda unmounts the modal on close, but if cfg loads after mount (getConfig is async) the cidade stays empty. Low risk.",
+    "Agenda/Ordens setStatus/concluir/remove have no try/catch, so failed API calls give no error toast",
+    "Backend: no input validation on status/tipo enums (any string accepted); POST /restore deletes collections with no schema validation",
+    "Server clock reports 2026-10-27, while the request context says Jan 2026, so seed data dates are October 2026"
+  ],
+  "updated_files": ["/app/backend/tests/test_mvl_crm.py"],
+  "success_rate": {"backend": "100% (14/14)", "frontend": "~90% (all flows work; emoji corruption in WA text and mobile Config access are the main gaps)"},
+  "seed_data_creation": "A temporary TEST_ client, agendamentos, ordens and midias were created and all removed. Config was restored to its original values.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "No auth. Navigation is state-based: desktop uses nav-{id}-button, mobile uses mnav-{id}-button (dashboard, clientes, os, agenda, whatsapp only). Flyer: agenda-view-lista, then agenda-flyer-{id}, then flyer-modal. Download PNG is 1215x2160. Run the backend tests with REACT_APP_BACKEND_URL exported: pytest /app/backend/tests/. Check that the wa link no longer goes through wa.me (look at the popup URL for %EF%BF%BD).",
+  "rca of the issue": "Emoji corruption: the WhatsApp wa.me short-link server re-encodes the text param during its 302 redirect to api.whatsapp.com/send/ and replaces supplementary-plane chars (emojis) with U+FFFD. The app's encodeURIComponent is correct. Reproduce with curl -sI 'https://wa.me/5532988881111?text=%F0%9F%94%A5test' and check the Location header. Mitigation: link to api.whatsapp.com/send directly."
+}

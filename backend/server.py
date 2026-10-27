@@ -8,7 +8,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 ROOT_DIR = Path(__file__).parent
@@ -45,7 +45,7 @@ class Cliente(BaseModel):
 
 
 class ClienteCreate(BaseModel):
-    nome: str
+    nome: str = Field(min_length=1)
     tel: str = ""
     wa: str = ""
     end: str = ""
@@ -294,7 +294,7 @@ async def get_stats():
     os_abertas = await db.ordens.count_documents({"status": "pendente"})
     os_concluidas = await db.ordens.count_documents({"status": "concluida"})
     ag_total = await db.agendamentos.count_documents({})
-    hoje = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    hoje = datetime.now(timezone(timedelta(hours=-3))).strftime("%Y-%m-%d")
     ag_hoje = await db.agendamentos.count_documents({"data": hoje, "status": "agendado"})
     return {
         "clientes": clientes,

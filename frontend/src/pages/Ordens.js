@@ -65,13 +65,13 @@ export default function Ordens() {
 
   const comprovante = (o) => {
     const cli = clientes.find((c) => c.id === o.cliId);
-    const msg = `*COMPROVANTE DE SERVIÇO - MVL FOGÕES*%0A%0A` +
-      `OS: #${o.num}%0ACliente: ${o.nomeCli}%0AServiço: ${o.servico}%0A` +
-      (o.problema ? `Defeito: ${o.problema}%0A` : "") +
-      (o.pecas ? `Peças: ${o.pecas}%0A` : "") +
-      `Valor: ${fmtBRL(o.valor)}%0AGarantia: ${o.garantia} meses%0AData: ${fmtData(o.data)}%0A%0A` +
+    const msg = `*COMPROVANTE DE SERVIÇO - MVL FOGÕES*\n\n` +
+      `OS: #${o.num}\nCliente: ${o.nomeCli}\nServiço: ${o.servico}\n` +
+      (o.problema ? `Defeito: ${o.problema}\n` : "") +
+      (o.pecas ? `Peças: ${o.pecas}\n` : "") +
+      `Valor: ${fmtBRL(o.valor)}\nGarantia: ${o.garantia} meses\nData: ${fmtData(o.data)}\n\n` +
       `Técnico: ${cfg.tecnico}`;
-    window.open(waLink(cli?.wa || cli?.tel, decodeURIComponent(msg)), "_blank");
+    window.open(waLink(cli?.wa || cli?.tel, msg), "_blank");
   };
 
   if (sel) {

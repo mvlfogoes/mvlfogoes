@@ -128,11 +128,11 @@ export default function Agenda() {
           </select>
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Data"><input type="date" value={form.data} onChange={(e) => setForm((f) => ({ ...f, data: e.target.value }))} className={inputCls} /></Field>
-          <Field label="Hora"><input type="time" value={form.hora} onChange={(e) => setForm((f) => ({ ...f, hora: e.target.value }))} className={inputCls} /></Field>
+          <Field label="Data"><input type="date" data-testid="agenda-data-input" value={form.data} onChange={(e) => setForm((f) => ({ ...f, data: e.target.value }))} className={inputCls} /></Field>
+          <Field label="Hora"><input type="time" data-testid="agenda-hora-input" value={form.hora} onChange={(e) => setForm((f) => ({ ...f, hora: e.target.value }))} className={inputCls} /></Field>
         </div>
-        <Field label="Taxa de Visita (R$)"><input type="number" value={form.valor} onChange={(e) => setForm((f) => ({ ...f, valor: e.target.value }))} className={inputCls} placeholder="0,00" /></Field>
-        <Field label="Observações"><textarea value={form.obs} onChange={(e) => setForm((f) => ({ ...f, obs: e.target.value }))} rows={2} className={inputCls} /></Field>
+        <Field label="Taxa de Visita (R$)"><input type="number" data-testid="agenda-valor-input" value={form.valor} onChange={(e) => setForm((f) => ({ ...f, valor: e.target.value }))} className={inputCls} placeholder="0,00" /></Field>
+        <Field label="Observações"><textarea data-testid="agenda-obs-input" value={form.obs} onChange={(e) => setForm((f) => ({ ...f, obs: e.target.value }))} rows={2} className={inputCls} /></Field>
         <Btn onClick={save} className="w-full" data-testid="agenda-save-btn">Salvar</Btn>
       </Modal>
 
@@ -155,11 +155,11 @@ function EvCard({ a, showDate, openEdit, setStatus, remove, abrirFlyer }) {
       <div className="flex flex-wrap gap-1.5 mt-3">
         {a.status === "agendado" && <>
           <Btn variant="fire" className="!px-2.5 !py-1.5 text-xs" onClick={() => setStatus(a, "concluido")} data-testid={`agenda-done-${a.id}`}><CheckCircle2 size={14} /> Concluir</Btn>
-          <Btn variant="danger" className="!px-2.5 !py-1.5 text-xs" onClick={() => setStatus(a, "cancelado")}><XCircle size={14} /></Btn>
+          <Btn variant="danger" className="!px-2.5 !py-1.5 text-xs" onClick={() => setStatus(a, "cancelado")} data-testid={`agenda-cancel-${a.id}`} aria-label="Cancelar"><XCircle size={14} /></Btn>
         </>}
         <Btn variant="outline" className="!px-2.5 !py-1.5 text-xs" onClick={() => abrirFlyer(a)} data-testid={`agenda-flyer-${a.id}`}><Bell size={14} /> Lembrete</Btn>
-        <Btn variant="ghost" className="!px-2.5 !py-1.5 text-xs" onClick={() => openEdit(a)}><Pencil size={14} /></Btn>
-        <Btn variant="ghost" className="!px-2.5 !py-1.5 text-xs" onClick={() => remove(a)}><Trash2 size={14} /></Btn>
+        <Btn variant="ghost" className="!px-2.5 !py-1.5 text-xs" onClick={() => openEdit(a)} data-testid={`agenda-edit-${a.id}`} aria-label="Editar"><Pencil size={14} /></Btn>
+        <Btn variant="ghost" className="!px-2.5 !py-1.5 text-xs" onClick={() => remove(a)} data-testid={`agenda-delete-${a.id}`} aria-label="Excluir"><Trash2 size={14} /></Btn>
       </div>
     </div>
   );

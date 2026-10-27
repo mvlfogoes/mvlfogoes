@@ -53,7 +53,7 @@ export function buildFlyerText(f, cfg) {
   ].filter((l) => l !== null).join("\n");
 }
 
-const lbl = { fontWeight: 800, fontSize: 11, color: "#FF6A00", textTransform: "uppercase", letterSpacing: 0.5 };
+const lbl = { fontWeight: 800, fontSize: 11, color: "#FF6A00", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 };
 const val = { width: "100%", border: "none", borderBottom: "1px dashed #c9c2b8", background: "transparent", fontSize: 14, fontWeight: 600, color: "#1a1a1a", padding: "2px 0 3px", outline: "none", fontFamily: "Inter, sans-serif", minHeight: 22, lineHeight: "18px" };
 
 const Field = ({ label, k, f, set, cap, flex = 1, testid }) => (
@@ -73,9 +73,9 @@ const Header = ({ cfg }) => (
     <div style={{ fontSize: 9, letterSpacing: 2, color: "#cfcfcf", marginTop: 2 }}>ASSISTÊNCIA TÉCNICA ESPECIALIZADA</div>
     <div style={{ color: "#FF8A3C", fontWeight: 700, fontSize: 11, marginTop: 6 }}>{(cfg.slogan || "Qualidade que dá confiança!").toUpperCase()}</div>
     <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: 8, fontSize: 10, fontWeight: 700 }}>
-      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><ShieldCheck size={12} color="#FF8A3C" /> SEGURANÇA</span>
-      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Star size={12} color="#FFCC00" /> QUALIDADE</span>
-      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Handshake size={12} color="#FF8A3C" /> CONFIANÇA</span>
+      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><ShieldCheck size={12} color="#FF8A3C" style={{ display: "block", flexShrink: 0 }} /> SEGURANÇA</span>
+      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Star size={12} color="#FFCC00" style={{ display: "block", flexShrink: 0 }} /> QUALIDADE</span>
+      <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Handshake size={12} color="#FF8A3C" style={{ display: "block", flexShrink: 0 }} /> CONFIANÇA</span>
     </div>
   </div>
 );
@@ -85,9 +85,9 @@ const Solucoes = ({ cfg }) => {
   return (
     <div style={{ background: "#faf6f0", padding: "8px 14px", textAlign: "center" }}>
       <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
-        {sol.map(([I, t]) => <span key={t} style={{ display: "flex", alignItems: "center", gap: 3, fontWeight: 800, fontSize: 10 }}><I size={11} color="#FF6A00" />{t}</span>)}
+        {sol.map(([I, t]) => <span key={t} style={{ display: "flex", alignItems: "center", gap: 3, fontWeight: 800, fontSize: 10 }}><I size={11} color="#FF6A00" style={{ display: "block", flexShrink: 0 }} />{t}</span>)}
       </div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5, color: "#FF6A00", fontWeight: 800, fontSize: 15, marginTop: 4 }}><Phone size={13} /> FALE CONOSCO: {cfg.telefone || "(32) 98885-6030"}</div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5, color: "#FF6A00", fontWeight: 800, fontSize: 15, marginTop: 4 }}><Phone size={13} style={{ display: "block", flexShrink: 0 }} /> FALE CONOSCO: {cfg.telefone || "(32) 98885-6030"}</div>
     </div>
   );
 };
@@ -99,9 +99,11 @@ const Servicos = ({ f, set, cap }) => (
       {TIPOS.map((t) => {
         const on = f.tipo === t.key;
         return (
-          <span key={t.key} data-testid={`flyer-tipo-${t.key}`} onClick={() => !cap && set({ ...f, tipo: on ? "" : t.key })} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, cursor: "pointer", userSelect: "none" }}>
-            <span style={{ width: 17, height: 17, borderRadius: 4, border: "2px solid #FF6A00", display: "flex", alignItems: "center", justifyContent: "center", color: "#FF6A00", fontWeight: 900, fontSize: 12, background: on ? "#fff2e6" : "#fff" }}>{on ? "✓" : ""}</span>
-            {t.label}
+          <span key={t.key} data-testid={`flyer-tipo-${t.key}`} onClick={() => !cap && set({ ...f, tipo: on ? "" : t.key })} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, lineHeight: "17px", height: 17, cursor: "pointer", userSelect: "none" }}>
+            <span style={{ width: 17, height: 17, boxSizing: "border-box", borderRadius: 4, border: "2px solid #FF6A00", padding: 2, background: "#fff", flexShrink: 0 }}>
+              {on && <span style={{ display: "block", width: "100%", height: "100%", borderRadius: 2, background: "#FF6A00" }} />}
+            </span>
+            <span style={{ display: "block", lineHeight: "17px" }}>{t.label}</span>
           </span>
         );
       })}
@@ -110,11 +112,11 @@ const Servicos = ({ f, set, cap }) => (
 );
 
 const Obs = ({ f, set, cap }) => {
-  const box = { ...val, fontSize: 12, fontWeight: 500, color: "#333", lineHeight: "17px", border: "1px dashed #c9c2b8", borderRadius: 8, padding: 8, height: 92, resize: "none", whiteSpace: "pre-wrap", overflow: "hidden" };
+  const box = { ...val, fontSize: 12, fontWeight: 500, color: "#333", lineHeight: "17px", border: "1px solid #e4ded5", borderRadius: 8, padding: 8, height: 92, boxSizing: "border-box", resize: "none", whiteSpace: "pre-wrap", overflow: "hidden", display: "block" };
   return (
     <div>
-      <div style={lbl}>Observações</div>
-      {cap ? <div style={{ ...box, border: "1px solid #e4ded5" }}>{f.obs}</div>
+      <div style={{ ...lbl, marginBottom: 5 }}>Observações</div>
+      {cap ? <div style={box}>{f.obs}</div>
         : <textarea data-testid="flyer-input-obs" value={f.obs} onChange={(e) => set({ ...f, obs: e.target.value })} style={box} />}
     </div>
   );
@@ -135,7 +137,7 @@ const Flyer = ({ f, set, cfg, cap, innerRef }) => {
     <div ref={innerRef} data-testid="flyer-canvas" style={{ width: W, height: H, background: "#fff", fontFamily: "Inter, sans-serif", color: "#1a1a1a", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <Header cfg={cfg} />
       <Solucoes cfg={cfg} />
-      <div style={{ flex: 1, padding: "12px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <div style={{ flex: 1, padding: "14px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={{ display: "flex", gap: 14 }}><Field label="Cliente" k="nome" flex={1.4} testid="flyer-input-nome" {...p} /><Field label="Telefone" k="tel" testid="flyer-input-tel" {...p} /></div>
         <Field label="Endereço" k="end" testid="flyer-input-end" {...p} />
         <Field label="Cidade" k="cidade" testid="flyer-input-cidade" {...p} />
