@@ -22,7 +22,11 @@ export function extrair(txt) {
   const t = txt.match(/\(?\d{2}\)?\s?9?\s?\d{4}[-\s]?\d{4}/);
   if (t) r.tel = t[0].trim();
   const e = txt.match(/\b(rua|r\.|av\.?|avenida|travessa|tv\.|estrada|rodovia|praça|pça)\s[^\n]+/i);
-  if (e) r.end = e[0].trim();
+  if (e) {
+    let end = e[0].split(/\.\s|[!?;]/)[0];
+    CIDADES.forEach((x) => { const i = end.toLowerCase().indexOf(x.toLowerCase()); if (i > 0) end = end.slice(0, i); });
+    r.end = end.replace(/[\s,.-]+$/, "").trim();
+  }
   const c = CIDADES.find((x) => txt.toLowerCase().includes(x.toLowerCase()));
   if (c) r.cidade = `${c} - MG`;
   const tipo = [["cooktop", "cooktop"], ["forno", "forno"], ["fogão", "fogao"], ["fogao", "fogao"]].find(([k]) => txt.toLowerCase().includes(k));

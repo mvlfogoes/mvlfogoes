@@ -104,7 +104,7 @@ export default function Clientes() {
         <input data-testid="client-search-input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nome, telefone, bairro..." className={`${inputCls} pl-10`} />
       </div>
       <CidadeChips value={cidade} onChange={setCidade} clientes={clientes} prefix="client" />
-      {list.length === 0 ? <Empty icon={Search} title="Nenhum cliente" sub="Cadastre seu primeiro cliente." /> : (
+      {list.length === 0 ? <Empty icon={Search} title="Nenhum cliente" sub={cidade ? `Nenhum cliente com a etiqueta ${cidade}.` : "Cadastre seu primeiro cliente."} /> : (
         <div className="grid sm:grid-cols-2 gap-3">
           {list.map((c) => (
             <button key={c.id} data-testid={`client-card-${c.id}`} onClick={() => setSel(c)} className="glass glass-hover rounded-2xl p-4 text-left">

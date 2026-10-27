@@ -62,7 +62,7 @@ const val = { width: "100%", border: "none", borderBottom: "1px dashed #c9c2b8",
 const Field = ({ label, k, f, set, cap, flex = 1, testid }) => (
   <div style={{ flex, minWidth: 0 }}>
     <div style={lbl}>{label}</div>
-    {cap ? <div style={{ ...val, borderBottom: "1px solid #d6d0c7" }}>{f[k] || "\u00a0"}</div>
+    {cap ? <div style={{ ...val, borderBottom: "1px solid #d6d0c7", whiteSpace: "nowrap", overflow: "hidden" }}>{f[k] || "\u00a0"}</div>
       : <input data-testid={testid} value={f[k]} onChange={(e) => set({ ...f, [k]: e.target.value })} placeholder="toque para preencher" style={val} />}
   </div>
 );
@@ -98,11 +98,11 @@ const Solucoes = ({ cfg }) => {
 const Servicos = ({ f, set, cap }) => (
   <div>
     <div style={lbl}>Serviço</div>
-    <div style={{ display: "flex", gap: 12, marginTop: 5 }}>
+    <div style={{ display: "flex", gap: 10, marginTop: 0 }}>
       {TIPOS.map((t) => {
         const on = f.tipo === t.key;
         return (
-          <span key={t.key} role="button" data-testid={`flyer-tipo-${t.key}`} onClick={() => !cap && set({ ...f, tipo: t.key })} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, lineHeight: "17px", height: 17, padding: "6px 4px", margin: "-6px -4px", cursor: "pointer", userSelect: "none", WebkitTapHighlightColor: "transparent", color: on ? "#FF6A00" : "#1a1a1a", fontWeight: on ? 800 : 400 }}>
+          <span key={t.key} role="button" data-testid={`flyer-tipo-${t.key}`} onClick={() => !cap && set({ ...f, tipo: t.key })} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, lineHeight: "17px", height: 17, padding: "4px 2px", cursor: "pointer", userSelect: "none", WebkitTapHighlightColor: "transparent", color: on ? "#FF6A00" : "#1a1a1a", fontWeight: on ? 800 : 400 }}>
             <span style={{ width: 17, height: 17, boxSizing: "border-box", borderRadius: 4, border: "2px solid #FF6A00", background: on ? "#FF6A00" : "#fff", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
               {on && <Check size={12} color="#fff" strokeWidth={4} style={{ display: "block" }} />}
             </span>
@@ -142,7 +142,7 @@ const Flyer = ({ f, set, cfg, cap, innerRef }) => {
       <Solucoes cfg={cfg} />
       <div style={{ flex: 1, padding: "14px 18px", display: "flex", flexDirection: "column", gap: 8, minHeight: 0 }}>
         <div style={{ display: "flex", gap: 14 }}><Field label="Cliente" k="nome" flex={1.4} testid="flyer-input-nome" {...p} /><Field label="Telefone" k="tel" testid="flyer-input-tel" {...p} /></div>
-        <div style={{ display: "flex", gap: 14 }}><Field label="Endereço" k="end" flex={1.6} testid="flyer-input-end" {...p} /><Field label="Cidade" k="cidade" testid="flyer-input-cidade" {...p} /></div>
+        <div style={{ display: "flex", gap: 14 }}><Field label="Endereço" k="end" flex={1.25} testid="flyer-input-end" {...p} /><Field label="Cidade" k="cidade" testid="flyer-input-cidade" {...p} /></div>
         <div style={{ display: "flex", gap: 14, background: "#fff4ea", borderRadius: 10, padding: "8px 10px" }}><Field label="Data da visita" k="data" testid="flyer-input-data" {...p} /><Field label="Horário" k="hora" testid="flyer-input-hora" {...p} /></div>
         <Servicos {...p} />
         <div style={{ display: "flex", gap: 14 }}><Field label="Detalhe do serviço" k="servico" flex={1.4} testid="flyer-input-servico" {...p} /><Field label="Taxa de visita" k="taxa" testid="flyer-input-taxa" {...p} /></div>
@@ -182,7 +182,7 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false 
         onclone: (doc) => {
           doc.querySelector('[data-testid="flyer-canvas"]').parentElement.style.transform = "none";
           const st = doc.createElement("style");
-          st.textContent = "[data-ico]{position:relative;top:2px}[data-lbl]{position:relative;top:-3px}";
+          st.textContent = "[data-ico]{position:relative;top:2px}[data-lbl]{position:relative;top:-1px}";
           doc.head.appendChild(st);
         },
       });

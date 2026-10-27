@@ -11,6 +11,9 @@ FastAPI + MongoDB (motor) / React 19 + Vite + Tailwind v4 / PWA (manifest + sw.j
 - PWA instalável
 - 2026-06: Flyer em formato de papel timbrado: campos preenchidos e editáveis na tela, tamanho 9:16 (405x720), PNG em alta resolução 1215x2160 para dar zoom com os dedos, envio da imagem pelo compartilhamento do celular (navigator.share) e, se não for possível, download + link do WhatsApp
 - Correções: links do WhatsApp via api.whatsapp.com (emojis preservados), comprovante com '%', data local / UTC-3, botão de Config no celular, nome de cliente obrigatório, data-testids, toasts na parte de baixo
+- 2026-06: Caixa de serviço do flyer marcada de forma visível (caixa laranja com ✓), tipo pré-marcado pelo agendamento ou deduzido do texto do serviço
+- 2026-06: Etiquetas de cidade (Bicas, Mar de Espanha, Pequeri, Maripá de Minas, Guarará, Rochedo de Minas) em Clientes e WhatsApp, com filtro e busca. Ao tocar no cliente na Central WhatsApp: abrir conversa, enviar flyer ou montar o flyer com dados da conversa (colar texto, preencher automático, selecionar trecho → campo)
+- Limitação: o WhatsApp não permite que apps leiam conversas/etiquetas; os dados vêm copiados e colados
 
 ## Backlog
 - P2: pequeno desalinhamento dos ícones no PNG exportado (html2canvas)

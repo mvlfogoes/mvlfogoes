@@ -1,0 +1,32 @@
+{
+  "summary": "Frontend-only test on mobile (390x844) of the flyer checkbox fix, city etiquetas, WhatsApp client sheet and ConversaPanel. Everything works except one bug in the address auto-extraction. Flyer checkboxes: the pre-check works (empty tipo -> fogao, 'limpeza cooktop' -> cooktop, 'Forno nao esquenta' -> forno). Tapping a box switches the selection (orange filled box with a white check, label at weight 800). Tapping the same box again keeps it selected. The downloaded PNG (1215x2160) shows Cooktop checked. Agenda edit with an empty tipo loads 'fogao' and saving persists tipo='fogao' (checked via API). Clientes: all 7 city chips show counts, the datalist has all 6 cities, and a client created with etiqueta Bicas changed the counts (Todas 2->3, Bicas 0->1). The Bicas/Pequeri/Todas filters and search work. WhatsApp: the search (by phone) and chip filters work. wa-send opens the template link without opening the sheet. Tapping a card opens the sheet with the next visit and an open-chat link (api.whatsapp.com/send?phone=5532999991111). send-flyer opened a flyer pre-filled from the client and next agendamento (cidade 'Bicas - MG', data 05/11/2026, 09:30, forno, R$ 60,00). flyer-from-chat opened the conversa-panel. Auto-fill got data 30/10/2026, hora 15:00, cidade 'Mar de Espanha - MG', tipo forno and taxa 'R$ 80', but the address was wrong (see issue). Selecting text and tapping conversa-campo-nome/tel filled those fields, and tapping with no selection shows an info toast. No page errors. Test data was cleaned up.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "ConversaPanel extrair() address regex", "issue": "conversa-auto-btn set flyer-input-end to 'Rua Antônio Carlos 45, Mar de Espanha. Meu forno não acende R$ 80' instead of 'Rua Antônio Carlos 45'. The regex /\\b(rua|...)\\s[^\\n]+/i captures everything up to the end of the line.", "selector": "[data-testid='flyer-input-end']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Flyer PNG (html2canvas capture)", "issues": ["In the downloaded PNG the checkbox row sits too high and overlaps the 'SERVIÇO' label, and the label text sits a few px below the box centers. The checked state is still clearly visible. The live view looks fine; the onclone offset hacks ([data-lbl] top:-3px, and the negative margin on the tipo spans) are the probable cause."]},
+      {"screen": "Clientes city filter empty state", "issues": ["When a city chip has 0 clients, the empty state says 'Cadastre seu primeiro cliente.'. The WhatsApp page shows a city-specific message; use the same here."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix extrair() address: stop at the first comma/period or at a known city name, e.g. /\\b(rua|r\\.|av\\.?|avenida|travessa|tv\\.|estrada|rodovia|praça|pça)\\s[^,.\\n]+(?:,?\\s*(?:n[ºo°]?\\s*)?\\d+)?/i, so the example gives 'Rua Antônio Carlos 45'",
+    "Optional: format the extracted taxa with fmtBRL ('R$ 80,00') to match the agenda pre-fill format",
+    "Optional: fix the checkbox/label vertical offset in the html2canvas output",
+    "Optional: make the etiqueta match ignore case and accents (typing 'bicas' or 'Guarara' currently won't match the chips), or normalize to CIDADES on save"
+  ],
+  "critical_code_review_comments": [
+    "CidadeChips and the filters use strict equality c.etiqueta === cidade, so etiquetas typed in a different case or without accents are not counted.",
+    "extrair() hora regex could match stray patterns like '2h' in other contexts; acceptable for an MVP.",
+    "Pre-existing seed clients use the etiquetas 'Residencial'/'Comercial', which no longer appear under any city chip (they only show under Todas)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "95%"},
+  "seed_data_creation": "Created TEST_ agendamentos and the client 'TEST_Bicas Cliente' via API/UI; all deleted afterwards.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "State-based nav via mnav-* buttons. In the Agenda list view (agenda-view-lista) use agenda-flyer-{id}. Checked state can be verified via flyer-tipo-{k}.firstElementChild background rgb(255,106,0) plus an svg check. Server date is 2026-10-27. To retest the address fix, use the same conversa text and expect end='Rua Antônio Carlos 45'."
+}
