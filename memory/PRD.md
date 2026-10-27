@@ -1,0 +1,17 @@
+# MVL Fogões — PRD
+
+## Problema original
+App de CRM e Ordens de Serviço para assistência técnica de fogões (baseado no PDF MVL-Fogoes-codigo-completo.pdf). Funcional, sem bugs, visual futurista. Instalável no Android (PWA). Flyer de lembrete de agendamento para WhatsApp.
+
+## Arquitetura
+FastAPI + MongoDB (motor) / React 19 + Vite + Tailwind v4 / PWA (manifest + sw.js) / html2canvas para o flyer.
+
+## Implementado
+- Dashboard, Clientes, Ordens, Agenda, Mídias, WhatsApp, Garantias, Config, relatório, backup/restore
+- PWA instalável
+- 2026-06: Flyer em formato de papel timbrado: campos preenchidos e editáveis na tela, tamanho 9:16 (405x720), PNG em alta resolução 1215x2160 para dar zoom com os dedos, envio da imagem pelo compartilhamento do celular (navigator.share) e, se não for possível, download + link do WhatsApp
+- Correções: links do WhatsApp via api.whatsapp.com (emojis preservados), comprovante com '%', data local / UTC-3, botão de Config no celular, nome de cliente obrigatório, data-testids, toasts na parte de baixo
+
+## Backlog
+- P2: pequeno desalinhamento dos ícones no PNG exportado (html2canvas)
+- P2: logo personalizada no flyer

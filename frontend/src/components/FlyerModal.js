@@ -117,7 +117,7 @@ const Obs = ({ f, set, cap }) => {
     <div style={{ flex: 1, minHeight: 60, display: "flex", flexDirection: "column" }}>
       <div style={{ ...lbl, marginBottom: 5 }}>Observações</div>
       {cap ? <div style={{ ...box, flex: 1 }}>{f.obs}</div>
-        : <textarea data-testid="flyer-input-obs" maxLength={200} value={f.obs} onChange={(e) => set({ ...f, obs: e.target.value })} style={{ ...box, flex: 1 }} />}
+        : <textarea data-testid="flyer-input-obs" maxLength={200} value={f.obs} onChange={(e) => set({ ...f, obs: e.target.value.split("\n").slice(0, 6).join("\n") })} style={{ ...box, flex: 1 }} />}
     </div>
   );
 };
@@ -137,7 +137,7 @@ const Flyer = ({ f, set, cfg, cap, innerRef }) => {
     <div ref={innerRef} data-testid="flyer-canvas" style={{ width: W, height: H, background: "#fff", fontFamily: "Inter, sans-serif", color: "#1a1a1a", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <Header cfg={cfg} />
       <Solucoes cfg={cfg} />
-      <div style={{ flex: 1, padding: "14px 18px", display: "flex", flexDirection: "column", gap: 9, minHeight: 0 }}>
+      <div style={{ flex: 1, padding: "14px 18px", display: "flex", flexDirection: "column", gap: 8, minHeight: 0 }}>
         <div style={{ display: "flex", gap: 14 }}><Field label="Cliente" k="nome" flex={1.4} testid="flyer-input-nome" {...p} /><Field label="Telefone" k="tel" testid="flyer-input-tel" {...p} /></div>
         <div style={{ display: "flex", gap: 14 }}><Field label="Endereço" k="end" flex={1.6} testid="flyer-input-end" {...p} /><Field label="Cidade" k="cidade" testid="flyer-input-cidade" {...p} /></div>
         <div style={{ display: "flex", gap: 14, background: "#fff4ea", borderRadius: 10, padding: "8px 10px" }}><Field label="Data da visita" k="data" testid="flyer-input-data" {...p} /><Field label="Horário" k="hora" testid="flyer-input-hora" {...p} /></div>

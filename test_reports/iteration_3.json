@@ -1,0 +1,29 @@
+{
+  "summary": "Retest of the iteration_2 issues. Backend: 19/19 pytest passed, including 3 new tests. nome '   ' gives 422 on POST and on PUT, and '  TEST_Strip  ' is stored as 'TEST_Strip'. Flyer on mobile 390x844: the footer is now visible on screen and in the downloaded PNG (1215x2160). Endereço and Cidade are in one row. The obs box fills the remaining space (107px) and has a solid border on all 4 sides. Field padding-bottom is 5px. Obs maxLength is 200: filling 300 chars kept 200. Pre-fill is correct: nome, tel, end, cidade 'Bicas - MG', data 28/10/2026, hora, servico, taxa R$ 80,00, and obs = default text + ag.obs. Editing the nome and toggling Cooktop are reflected in the PNG. The send fallback opens api.whatsapp.com with phone 5532999991111 and the emoji text. Agenda create/edit/concluir/delete works on mobile. No page errors. New issue found: the sonner toast covers the flyer close button for a few seconds after download or send.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "FlyerModal + Sonner toast (mobile)", "issue": "After flyer-download-btn or flyer-send-btn, the top 'Imagem salva...' toast covers the modal header. elementFromPoint at the close button returns the toast <li>, so tapping X (even with force) does not close the modal until the toast is dismissed. Fix: put the Toaster at bottom-center, or give it an offset or a lower z-index than the modal header while the flyer is open.", "selector": "[data-testid='flyer-close-btn']", "priority": "MEDIUM"},
+      {"component": "FlyerModal Obs", "issue": "maxLength 200 does not limit line breaks. 8 short lines give scrollHeight 152 vs clientHeight 107, so they are clipped in the PNG with no warning. Consider limiting the number of lines (for example 6) or auto-shrinking the font.", "selector": "[data-testid='flyer-input-obs']", "priority": "LOW"},
+      {"component": "Flyer layout", "issue": "The Footer bottom is at 721px vs the canvas at 720px, so 1px of footer padding is clipped. Not visible. Cosmetic only.", "selector": "[data-testid='flyer-canvas']", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Flyer PNG (html2canvas)", "issues": ["Header and Soluções icons and the tipo checkboxes still sit slightly above their text baseline in the PNG (small issue, already known)."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_mvl_crm.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Stop the Sonner toast from covering flyer-close-btn on mobile (move the toast position or offset it)",
+    "Optional: limit the number of obs lines so the PNG is never clipped"
+  ],
+  "critical_code_review_comments": [
+    "enviar(): window.open after await html2canvas may be popup-blocked on real mobile browsers in the non-share fallback (low risk, already known)."
+  ],
+  "updated_files": ["/app/backend/tests/test_mvl_crm.py"],
+  "success_rate": {"backend": "100%", "frontend": "95%"},
+  "seed_data_creation": "Temporary cliente TEST_FlyerCli, its agendamento and TEST_AG3 were created and then deleted.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "No auth. Container date is 2026-10-27. Mobile nav: mnav-agenda-button, then agenda-view-lista, then agenda-flyer-{id}. Footer check: canvas children offsetTop+offsetHeight (currently 162/220/668/721). Run pytest with REACT_APP_BACKEND_URL exported."
+}

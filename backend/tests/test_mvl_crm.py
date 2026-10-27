@@ -148,3 +148,18 @@ def test_stats_ag_hoje_uses_brt(s):
         assert after == before + 1
     finally:
         s.delete(f"{BASE_URL}/api/agendamentos/{aid}")
+
+
+# Whitespace-only nome validation (iteration_3)
+def test_create_whitespace_nome_422(s):
+    assert s.post(f"{API}/clientes", json={"nome": "   "}).status_code == 422
+
+
+def test_update_whitespace_nome_422(s, cliente):
+    assert s.put(f"{API}/clientes/{cliente['id']}", json={"nome": "   "}).status_code == 422
+
+
+def test_nome_is_stripped(s):
+    r = s.post(f"{API}/clientes", json={"nome": "  TEST_Strip  "})
+    assert r.status_code == 200 and r.json()["nome"] == "TEST_Strip"
+    s.delete(f"{API}/clientes/{r.json()['id']}")
