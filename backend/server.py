@@ -92,6 +92,7 @@ class Agendamento(BaseModel):
     cliId: str = ""
     nomeCli: str = ""
     servico: str = ""
+    tipo: str = ""  # fogao | cooktop | forno | outro
     data: str = ""
     hora: str = ""
     status: str = "agendado"  # agendado | concluido | cancelado
@@ -104,6 +105,7 @@ class AgendamentoCreate(BaseModel):
     cliId: str = ""
     nomeCli: str = ""
     servico: str = ""
+    tipo: str = ""
     data: str = ""
     hora: str = ""
     status: str = "agendado"
@@ -133,10 +135,16 @@ class Config(BaseModel):
     id: str = "config"
     tecnico: str = "MVL Fogões"
     versao: str = "2.0"
+    telefone: str = "(32) 98885-6030"
+    cidade: str = "Bicas - MG"
+    slogan: str = "A qualidade que dá confiança!"
 
 
 class ConfigUpdate(BaseModel):
     tecnico: Optional[str] = None
+    telefone: Optional[str] = None
+    cidade: Optional[str] = None
+    slogan: Optional[str] = None
 
 
 # ---------------- Clientes ----------------

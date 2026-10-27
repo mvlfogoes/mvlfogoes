@@ -8,17 +8,23 @@ import { useApp } from "@/App";
 export default function Config() {
   const { cfg, setCfg } = useApp();
   const [tecnico, setTecnico] = useState(cfg.tecnico || "");
+  const [telefone, setTelefone] = useState(cfg.telefone || "");
+  const [cidade, setCidade] = useState(cfg.cidade || "");
+  const [slogan, setSlogan] = useState(cfg.slogan || "");
   const [stats, setStats] = useState(null);
   const [mes, setMes] = useState(new Date().toISOString().slice(0, 7));
   const [rel, setRel] = useState(null);
   const fileRef = useRef();
 
-  useEffect(() => { setTecnico(cfg.tecnico || ""); }, [cfg]);
+  useEffect(() => {
+    setTecnico(cfg.tecnico || ""); setTelefone(cfg.telefone || "");
+    setCidade(cfg.cidade || ""); setSlogan(cfg.slogan || "");
+  }, [cfg]);
   useEffect(() => { api.stats().then(setStats); }, []);
   useEffect(() => { api.relatorio(mes).then(setRel); }, [mes]);
 
   const saveTecnico = async () => {
-    const r = await api.updateConfig({ tecnico });
+    const r = await api.updateConfig({ tecnico, telefone, cidade, slogan });
     setCfg(r); toast.success("Dados salvos");
   };
 
@@ -47,9 +53,17 @@ export default function Config() {
       <SectionTitle>Configurações</SectionTitle>
 
       <div className="glass rounded-2xl p-5">
-        <h3 className="font-outfit font-bold flex items-center gap-2 mb-4"><User size={18} className="text-orange-400" /> Técnico / Empresa</h3>
-        <Field label="Nome do técnico"><input data-testid="config-tecnico-input" value={tecnico} onChange={(e) => setTecnico(e.target.value)} className={inputCls} /></Field>
+        <h3 className="font-outfit font-bold flex items-center gap-2 mb-4"><User size={18} className="text-orange-400" /> Dados da Empresa</h3>
+        <div className="space-y-3">
+          <Field label="Nome do técnico"><input data-testid="config-tecnico-input" value={tecnico} onChange={(e) => setTecnico(e.target.value)} className={inputCls} /></Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Telefone / WhatsApp"><input data-testid="config-telefone-input" value={telefone} onChange={(e) => setTelefone(e.target.value)} className={inputCls} placeholder="(32) 98885-6030" /></Field>
+            <Field label="Cidade"><input data-testid="config-cidade-input" value={cidade} onChange={(e) => setCidade(e.target.value)} className={inputCls} placeholder="Bicas - MG" /></Field>
+          </div>
+          <Field label="Slogan"><input data-testid="config-slogan-input" value={slogan} onChange={(e) => setSlogan(e.target.value)} className={inputCls} placeholder="A qualidade que dá confiança!" /></Field>
+        </div>
         <Btn onClick={saveTecnico} className="mt-3" data-testid="config-save-btn"><Save size={16} /> Salvar</Btn>
+        <p className="text-xs text-zinc-500 mt-3">Esses dados aparecem no <span className="text-orange-400">flyer de agendamento</span> enviado no WhatsApp.</p>
       </div>
 
       <div className="glass rounded-2xl p-5">

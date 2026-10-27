@@ -7,15 +7,22 @@ import {
 import { api, fmtData, hoje, waLink } from "@/lib/api";
 import { Modal, Field, inputCls, Btn, Badge, Empty, SectionTitle } from "@/lib/ui";
 import { useApp } from "@/App";
+import FlyerModal from "@/components/FlyerModal";
 
 const tone = { agendado: "amber", concluido: "green", cancelado: "red" };
 const lbl = { agendado: "Agendado", concluido: "Concluído", cancelado: "Cancelado" };
+const TIPOS = [
+  { key: "fogao", label: "Fogão" },
+  { key: "cooktop", label: "Cooktop" },
+  { key: "forno", label: "Forno" },
+  { key: "outro", label: "Outro" },
+];
 const MES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const DIA = ["D", "S", "T", "Q", "Q", "S", "S"];
-const blank = { cliId: "", nomeCli: "", servico: "", data: hoje(), hora: "", status: "agendado", valor: "", obs: "" };
+const blank = { cliId: "", nomeCli: "", servico: "", tipo: "fogao", data: hoje(), hora: "", status: "agendado", valor: "", obs: "" };
 
 export default function Agenda() {
-  const { clientes } = useApp();
+  const { clientes, cfg } = useApp();
   const [eventos, setEventos] = useState([]);
   const [view, setView] = useState("mes");
   const [cur, setCur] = useState(new Date());
@@ -23,6 +30,7 @@ export default function Agenda() {
   const [edit, setEdit] = useState(null);
   const [form, setForm] = useState(blank);
   const [selDay, setSelDay] = useState(hoje());
+  const [flyer, setFlyer] = useState(null);
 
   const reload = () => api.listAgenda().then(setEventos);
   useEffect(() => { reload(); }, []);
@@ -43,10 +51,7 @@ export default function Agenda() {
 
   const setStatus = async (a, status) => { await api.updateAgenda(a.id, { ...a, status }); toast.success("Atualizado"); reload(); };
   const remove = async (a) => { if (!window.confirm("Excluir agendamento?")) return; await api.deleteAgenda(a.id); reload(); };
-  const lembrete = (a) => {
-    const cli = clientes.find((c) => c.id === a.cliId);
-    window.open(waLink(cli?.wa || cli?.tel, `Olá ${a.nomeCli}! Lembrete da sua visita técnica MVL Fogões em ${fmtData(a.data)} às ${a.hora}. Serviço: ${a.servico}.`), "_blank");
-  };
+  const abrirFlyer = (a) => setFlyer({ ag: a, cli: clientes.find((c) => c.id === a.cliId) });
 
   const y = cur.getFullYear(), m = cur.getMonth();
   const first = new Date(y, m, 1).getDay();
@@ -101,12 +106,12 @@ export default function Agenda() {
           <div>
             <h3 className="font-outfit font-bold mb-3 capitalize">{new Date(selDay + "T00:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}</h3>
             {eventosDay.length === 0 ? <Empty icon={CalendarDays} title="Dia livre" sub="Nenhum compromisso neste dia." /> :
-              <div className="space-y-2">{eventosDay.map((a) => <EvCard key={a.id} a={a} {...{ openEdit, setStatus, remove, lembrete }} />)}</div>}
+              <div className="space-y-2">{eventosDay.map((a) => <EvCard key={a.id} a={a} {...{ openEdit, setStatus, remove, abrirFlyer }} />)}</div>}
           </div>
         </>
       ) : (
         eventos.length === 0 ? <Empty icon={List} title="Sem agendamentos" /> :
-          <div className="space-y-2">{[...eventos].sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora)).map((a) => <EvCard key={a.id} a={a} showDate {...{ openEdit, setStatus, remove, lembrete }} />)}</div>
+          <div className="space-y-2">{[...eventos].sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora)).map((a) => <EvCard key={a.id} a={a} showDate {...{ openEdit, setStatus, remove, abrirFlyer }} />)}</div>
       )}
 
       <Modal open={open} onClose={() => setOpen(false)} title={edit ? "Editar Agendamento" : "Novo Agendamento"} testId="agenda-modal">
@@ -117,18 +122,26 @@ export default function Agenda() {
           </select>
         </Field>
         <Field label="Serviço / Descrição"><input data-testid="agenda-servico-input" value={form.servico} onChange={(e) => setForm((f) => ({ ...f, servico: e.target.value }))} className={inputCls} /></Field>
+        <Field label="Tipo de Produto">
+          <select data-testid="agenda-tipo-select" value={form.tipo} onChange={(e) => setForm((f) => ({ ...f, tipo: e.target.value }))} className={inputCls}>
+            {TIPOS.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
+          </select>
+        </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Data"><input type="date" value={form.data} onChange={(e) => setForm((f) => ({ ...f, data: e.target.value }))} className={inputCls} /></Field>
           <Field label="Hora"><input type="time" value={form.hora} onChange={(e) => setForm((f) => ({ ...f, hora: e.target.value }))} className={inputCls} /></Field>
         </div>
+        <Field label="Taxa de Visita (R$)"><input type="number" value={form.valor} onChange={(e) => setForm((f) => ({ ...f, valor: e.target.value }))} className={inputCls} placeholder="0,00" /></Field>
         <Field label="Observações"><textarea value={form.obs} onChange={(e) => setForm((f) => ({ ...f, obs: e.target.value }))} rows={2} className={inputCls} /></Field>
         <Btn onClick={save} className="w-full" data-testid="agenda-save-btn">Salvar</Btn>
       </Modal>
+
+      {flyer && <FlyerModal open onClose={() => setFlyer(null)} ag={flyer.ag} cli={flyer.cli} cfg={cfg} />}
     </div>
   );
 }
 
-function EvCard({ a, showDate, openEdit, setStatus, remove, lembrete }) {
+function EvCard({ a, showDate, openEdit, setStatus, remove, abrirFlyer }) {
   return (
     <div className="glass rounded-2xl p-4">
       <div className="flex items-center gap-3">
@@ -144,7 +157,7 @@ function EvCard({ a, showDate, openEdit, setStatus, remove, lembrete }) {
           <Btn variant="fire" className="!px-2.5 !py-1.5 text-xs" onClick={() => setStatus(a, "concluido")} data-testid={`agenda-done-${a.id}`}><CheckCircle2 size={14} /> Concluir</Btn>
           <Btn variant="danger" className="!px-2.5 !py-1.5 text-xs" onClick={() => setStatus(a, "cancelado")}><XCircle size={14} /></Btn>
         </>}
-        <Btn variant="outline" className="!px-2.5 !py-1.5 text-xs" onClick={() => lembrete(a)} data-testid={`agenda-remind-${a.id}`}><Bell size={14} /> Lembrete</Btn>
+        <Btn variant="outline" className="!px-2.5 !py-1.5 text-xs" onClick={() => abrirFlyer(a)} data-testid={`agenda-flyer-${a.id}`}><Bell size={14} /> Lembrete</Btn>
         <Btn variant="ghost" className="!px-2.5 !py-1.5 text-xs" onClick={() => openEdit(a)}><Pencil size={14} /></Btn>
         <Btn variant="ghost" className="!px-2.5 !py-1.5 text-xs" onClick={() => remove(a)}><Trash2 size={14} /></Btn>
       </div>
