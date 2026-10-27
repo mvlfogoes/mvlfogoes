@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-  Search, Plus, Phone, MapPin, Pencil, Trash2, MessageCircle, Flame, ChevronLeft, Images,
+  Search, Plus, Phone, MapPin, Pencil, Trash2, MessageCircle, Flame, ChevronLeft, Images, CheckCircle2,
 } from "lucide-react";
 import { api, waLink, CIDADES } from "@/lib/api";
 import { CidadeChips } from "@/components/CidadeChips";
@@ -143,12 +143,21 @@ function ClienteModal({ open, setOpen, form, setForm, save, edit }) {
         <Field label="WhatsApp"><input value={form.wa} onChange={set("wa")} className={inputCls} placeholder="(opcional)" /></Field>
       </div>
       <Field label="Endereço"><input value={form.end} onChange={set("end")} className={inputCls} placeholder="Rua, nº, bairro" /></Field>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Modelo do Fogão"><input value={form.fogao} onChange={set("fogao")} className={inputCls} placeholder="Ex: Brastemp 5 bocas" /></Field>
-        <Field label="Cidade (etiqueta)">
-          <input data-testid="client-etiqueta-input" list="cidades-list" value={form.etiqueta} onChange={set("etiqueta")} className={inputCls} placeholder="Escolha a cidade" />
-          <datalist id="cidades-list">{CIDADES.map((c) => <option key={c} value={c} />)}</datalist>
-        </Field>
+      <Field label="Modelo do Fogão"><input value={form.fogao} onChange={set("fogao")} className={inputCls} placeholder="Ex: Brastemp 5 bocas" /></Field>
+      <div className="space-y-1.5">
+        <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">Cidade onde reside</span>
+        <div className="flex flex-wrap gap-2" data-testid="client-cidade-select">
+          {CIDADES.map((c) => {
+            const on = form.etiqueta === c;
+            return (
+              <button key={c} type="button" onClick={() => setForm((f) => ({ ...f, etiqueta: on ? "" : c }))}
+                data-testid={`client-cidade-opt-${c.toLowerCase().replace(/\s+/g, "-")}`}
+                className={`px-3 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-colors ${on ? "fire-btn text-white" : "bg-white/5 text-zinc-300 border border-white/10"}`}>
+                {on ? <CheckCircle2 size={15} /> : <MapPin size={15} className="text-orange-400" />} {c}
+              </button>
+            );
+          })}
+        </div>
       </div>
       <Field label="Observações"><textarea value={form.obs} onChange={set("obs")} rows={2} className={inputCls} /></Field>
       <Btn onClick={save} className="w-full" data-testid="client-save-btn">Salvar Cliente</Btn>
