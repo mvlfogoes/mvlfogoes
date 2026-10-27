@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
-import { X, Send, Download, Phone, Flame, Search, Wrench, ShieldCheck, Star, Handshake, Pencil } from "lucide-react";
+import { X, Send, Download, Phone, Flame, Search, Wrench, ShieldCheck, Star, Handshake, Pencil, Check } from "lucide-react";
 import { fmtBRL, fmtData, waLink } from "@/lib/api";
 
 const TIPOS = [
@@ -16,6 +16,8 @@ const W = 405;
 const H = 720;
 const OBS_PADRAO = "Em caso de necessidade de alteração, entre em contato com antecedência.";
 
+const tipoDe = (ag) => ag.tipo || TIPOS.find((t) => (ag.servico || "").toLowerCase().includes(t.key))?.key || "fogao";
+
 const initForm = (ag, cli, cfg) => ({
   nome: ag.nomeCli || "",
   tel: cli?.tel || "",
@@ -23,7 +25,7 @@ const initForm = (ag, cli, cfg) => ({
   cidade: cfg.cidade || "",
   data: fmtData(ag.data) || "",
   hora: ag.hora || "",
-  tipo: ag.tipo || "",
+  tipo: tipoDe(ag),
   servico: ag.servico || "",
   taxa: ag.valor ? fmtBRL(ag.valor) : "",
   obs: [OBS_PADRAO, ag.obs].filter(Boolean).join("\n"),
@@ -99,9 +101,9 @@ const Servicos = ({ f, set, cap }) => (
       {TIPOS.map((t) => {
         const on = f.tipo === t.key;
         return (
-          <span key={t.key} data-testid={`flyer-tipo-${t.key}`} onClick={() => !cap && set({ ...f, tipo: on ? "" : t.key })} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, lineHeight: "17px", height: 17, cursor: "pointer", userSelect: "none" }}>
-            <span style={{ width: 17, height: 17, boxSizing: "border-box", borderRadius: 4, border: "2px solid #FF6A00", padding: 2, background: "#fff", flexShrink: 0 }}>
-              {on && <span style={{ display: "block", width: "100%", height: "100%", borderRadius: 2, background: "#FF6A00" }} />}
+          <span key={t.key} role="button" data-testid={`flyer-tipo-${t.key}`} onClick={() => !cap && set({ ...f, tipo: t.key })} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, lineHeight: "17px", height: 17, padding: "6px 4px", margin: "-6px -4px", cursor: "pointer", userSelect: "none", WebkitTapHighlightColor: "transparent", color: on ? "#FF6A00" : "#1a1a1a", fontWeight: on ? 800 : 400 }}>
+            <span style={{ width: 17, height: 17, boxSizing: "border-box", borderRadius: 4, border: "2px solid #FF6A00", background: on ? "#FF6A00" : "#fff", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {on && <Check size={12} color="#fff" strokeWidth={4} style={{ display: "block" }} />}
             </span>
             <span data-lbl="1" style={{ display: "block", lineHeight: "17px" }}>{t.label}</span>
           </span>

@@ -36,7 +36,7 @@ export default function Agenda() {
   useEffect(() => { reload(); }, []);
 
   const openNew = (d) => { setEdit(null); setForm({ ...blank, data: d || hoje() }); setOpen(true); };
-  const openEdit = (a) => { setEdit(a); setForm({ ...blank, ...a, valor: String(a.valor ?? "") }); setOpen(true); };
+  const openEdit = (a) => { setEdit(a); setForm({ ...blank, ...a, tipo: a.tipo || "fogao", valor: String(a.valor ?? "") }); setOpen(true); };
 
   const save = async () => {
     if (!form.servico.trim() && !form.cliId) return toast.error("Informe cliente ou serviço");
