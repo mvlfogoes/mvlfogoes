@@ -43,6 +43,8 @@ export const fmtData = (d) => {
   return `${day}/${m}/${y}`;
 };
 
+export const CIDADES = ["Bicas", "Mar de Espanha", "Pequeri", "Maripá de Minas", "Guarará", "Rochedo de Minas"];
+
 export const hoje = () => new Date().toLocaleDateString("sv-SE");
 
 export const waLink = (tel, msg) => {

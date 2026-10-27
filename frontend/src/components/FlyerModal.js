@@ -3,7 +3,8 @@ import { createPortal } from "react-dom";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
 import { X, Send, Download, Phone, Flame, Search, Wrench, ShieldCheck, Star, Handshake, Pencil, Check } from "lucide-react";
-import { fmtBRL, fmtData, waLink } from "@/lib/api";
+import { fmtBRL, fmtData, waLink, CIDADES } from "@/lib/api";
+import { ConversaPanel } from "@/components/ConversaPanel";
 
 const TIPOS = [
   { key: "fogao", label: "Fogão" },
@@ -22,8 +23,8 @@ const initForm = (ag, cli, cfg) => ({
   nome: ag.nomeCli || "",
   tel: cli?.tel || "",
   end: cli?.end || "",
-  cidade: cfg.cidade || "",
-  data: fmtData(ag.data) || "",
+  cidade: (CIDADES.includes(cli?.etiqueta) ? `${cli.etiqueta} - MG` : cfg.cidade) || "",
+  data: ag.data ? fmtData(ag.data) : "",
   hora: ag.hora || "",
   tipo: tipoDe(ag),
   servico: ag.servico || "",
@@ -163,7 +164,7 @@ const useFitScale = () => {
   return s;
 };
 
-export default function FlyerModal({ open, onClose, ag, cli, cfg }) {
+export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false }) {
   const ref = useRef();
   const [busy, setBusy] = useState(false);
   const [cap, setCap] = useState(false);
@@ -235,7 +236,8 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg }) {
         </div>
         <button onClick={onClose} data-testid="flyer-close-btn" className="p-2 rounded-xl hover:bg-white/5 text-zinc-400"><X size={20} /></button>
       </div>
-      <div className="flex-1 overflow-auto p-3 flex justify-center">
+      <div className="flex-1 overflow-auto p-3 flex flex-col items-center gap-3">
+        {colar && <ConversaPanel f={f} set={setF} cli={cli} />}
         <div style={{ width: W * scale, height: H * scale, flexShrink: 0 }}>
           <div style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: W, height: H }} className="rounded-xl overflow-hidden shadow-2xl">
             <Flyer f={f} set={setF} cfg={cfg || {}} cap={cap} innerRef={ref} />

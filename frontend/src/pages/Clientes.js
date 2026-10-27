@@ -3,7 +3,8 @@ import { toast } from "sonner";
 import {
   Search, Plus, Phone, MapPin, Pencil, Trash2, MessageCircle, Flame, ChevronLeft, Images,
 } from "lucide-react";
-import { api, waLink } from "@/lib/api";
+import { api, waLink, CIDADES } from "@/lib/api";
+import { CidadeChips } from "@/components/CidadeChips";
 import { Modal, Field, inputCls, Btn, Badge, Empty, SectionTitle } from "@/lib/ui";
 import { useApp } from "@/App";
 
@@ -12,6 +13,7 @@ const blank = { nome: "", tel: "", wa: "", end: "", fogao: "", etiqueta: "", obs
 export default function Clientes() {
   const { clientes, reloadClientes, go } = useApp();
   const [q, setQ] = useState("");
+  const [cidade, setCidade] = useState("");
   const [open, setOpen] = useState(false);
   const [edit, setEdit] = useState(null);
   const [form, setForm] = useState(blank);
@@ -20,7 +22,7 @@ export default function Clientes() {
 
   useEffect(() => { api.listOrdens().then(setOrdens); }, [clientes]);
 
-  const list = clientes.filter((c) =>
+  const list = clientes.filter((c) => (!cidade || c.etiqueta === cidade) &&
     [c.nome, c.tel, c.end, c.etiqueta].join(" ").toLowerCase().includes(q.toLowerCase())
   );
 
@@ -101,6 +103,7 @@ export default function Clientes() {
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
         <input data-testid="client-search-input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nome, telefone, bairro..." className={`${inputCls} pl-10`} />
       </div>
+      <CidadeChips value={cidade} onChange={setCidade} clientes={clientes} prefix="client" />
       {list.length === 0 ? <Empty icon={Search} title="Nenhum cliente" sub="Cadastre seu primeiro cliente." /> : (
         <div className="grid sm:grid-cols-2 gap-3">
           {list.map((c) => (
@@ -142,7 +145,10 @@ function ClienteModal({ open, setOpen, form, setForm, save, edit }) {
       <Field label="Endereço"><input value={form.end} onChange={set("end")} className={inputCls} placeholder="Rua, nº, bairro" /></Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Modelo do Fogão"><input value={form.fogao} onChange={set("fogao")} className={inputCls} placeholder="Ex: Brastemp 5 bocas" /></Field>
-        <Field label="Etiqueta"><input value={form.etiqueta} onChange={set("etiqueta")} className={inputCls} placeholder="Residencial..." /></Field>
+        <Field label="Cidade (etiqueta)">
+          <input data-testid="client-etiqueta-input" list="cidades-list" value={form.etiqueta} onChange={set("etiqueta")} className={inputCls} placeholder="Escolha a cidade" />
+          <datalist id="cidades-list">{CIDADES.map((c) => <option key={c} value={c} />)}</datalist>
+        </Field>
       </div>
       <Field label="Observações"><textarea value={form.obs} onChange={set("obs")} rows={2} className={inputCls} /></Field>
       <Btn onClick={save} className="w-full" data-testid="client-save-btn">Salvar Cliente</Btn>
