@@ -10,9 +10,9 @@ import { MODELOS } from "@/components/flyerModelos";
 
 const Flyer = ({ M, f, set, cfg, cap, innerRef }) => (
   <div ref={innerRef} data-testid="flyer-canvas" style={{ width: W, height: H, background: "#fff", fontFamily: "Inter, sans-serif", color: "#1a1a1a", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-    <Header cfg={cfg} titulo={M.titulo} />
+    <Header cfg={cfg} titulo={M.titulo} compacto={M.compacto} />
     <Solucoes cfg={cfg} />
-    <div style={{ flex: 1, padding: "14px 18px", display: "flex", flexDirection: "column", gap: 8, minHeight: 0 }}>
+    <div style={{ flex: 1, padding: M.compacto ? "10px 18px" : "14px 18px", display: "flex", flexDirection: "column", gap: M.compacto ? 6 : 8, minHeight: 0 }}>
       <M.Body f={f} set={set} cap={cap} cfg={cfg} />
     </div>
     <Footer cfg={cfg} />
@@ -52,7 +52,7 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false,
         onclone: (doc) => {
           doc.querySelector('[data-testid="flyer-canvas"]').parentElement.style.transform = "none";
           const st = doc.createElement("style");
-          st.textContent = "[data-ico]{position:relative;top:2px}[data-lbl]{position:relative;top:-1px}";
+          st.textContent = "[data-ico]{position:relative;top:2px}[data-lbl]{position:relative;top:-1px}[data-testid=flyer-total] span{position:relative;top:-5px}[data-txt]{top:-4px}";
           doc.head.appendChild(st);
         },
       });

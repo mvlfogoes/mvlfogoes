@@ -7,7 +7,7 @@ const tipoDe = (s) => s.tipo || TIPOS.find((t) => (s.servico || "").toLowerCase(
 const cidadeDe = (cli, cfg) => (CIDADES.includes(cli?.etiqueta) ? `${cli.etiqueta} - MG` : cfg.cidade) || "";
 const base = (s, cli, cfg) => ({ nome: s.nomeCli || cli?.nome || "", tel: cli?.tel || "", end: cli?.end || "", cidade: cidadeDe(cli, cfg) });
 const row = { display: "flex", gap: 14 };
-const destaque = { ...row, background: "#fff4ea", borderRadius: 10, padding: "8px 10px" };
+const destaque = { ...row, background: "#fff4ea", borderRadius: 10, padding: "6px 10px" };
 const fim = (cfg) => ["", `📱 *Fale conosco:* ${cfg.telefone || ""}`];
 const linhas = (arr) => arr.filter((l) => l !== null && l !== undefined).join("\n");
 
@@ -19,6 +19,8 @@ const ClienteRows = (p) => (
 );
 
 const valoresTexto = (t) => [...String(t || "").matchAll(/R\$\s*([\d.,]+)/gi)].reduce((s, m) => s + num(m[1]), 0);
+const itemCell = { fontSize: 13, lineHeight: "22px", padding: "0 0 2px", minHeight: 0 };
+const MAX_ITENS = 5;
 const totalOrc = (f) => f.itens.reduce((s, it) => s + num(it.valor), 0) + valoresTexto(f.outros);
 
 const Itens = ({ f, set, cap }) => {
@@ -28,14 +30,14 @@ const Itens = ({ f, set, cap }) => {
     <div>
       <div style={{ ...lbl, display: "flex", justifyContent: "space-between" }}><span>Serviços e peças</span><span style={{ width: 92, textAlign: "right" }}>Valor</span></div>
       {itens.map((it, i) => (
-        <div key={i} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 2 }}>
+        <div key={i} style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <span style={{ fontSize: 11, fontWeight: 800, color: "#FF6A00", width: 12 }}>{i + 1}</span>
-          <div style={{ flex: 1, minWidth: 0 }}><Cell cap={cap} value={it.desc} onChange={(v) => upd(i, "desc", v)} testid={`flyer-item-desc-${i}`} placeholder="Serviço ou peça" style={{ fontSize: 13 }} /></div>
-          <div style={{ width: 80 }}><Cell cap={cap} value={cap && it.valor ? fmtBRL(num(it.valor)) : it.valor} onChange={(v) => upd(i, "valor", v)} testid={`flyer-item-valor-${i}`} placeholder="R$ 0,00" style={{ fontSize: 13, textAlign: "right" }} /></div>
+          <div style={{ flex: 1, minWidth: 0 }}><Cell cap={cap} value={it.desc} onChange={(v) => upd(i, "desc", v)} testid={`flyer-item-desc-${i}`} placeholder="Serviço ou peça" style={itemCell} /></div>
+          <div style={{ width: 84 }}><Cell cap={cap} value={cap && it.valor ? fmtBRL(num(it.valor)) : it.valor} onChange={(v) => upd(i, "valor", v)} testid={`flyer-item-valor-${i}`} placeholder="R$ 0,00" style={{ ...itemCell, textAlign: "right" }} /></div>
           {!cap && <button type="button" data-testid={`flyer-item-remove-${i}`} onClick={() => set({ ...f, itens: f.itens.filter((_, j) => j !== i) })} style={{ border: "none", background: "transparent", color: "#b9b2a8", padding: 0, cursor: "pointer" }}><X size={14} /></button>}
         </div>
       ))}
-      {!cap && f.itens.length < 6 && (
+      {!cap && f.itens.length < MAX_ITENS && (
         <button type="button" data-testid="flyer-item-add" onClick={() => set({ ...f, itens: [...f.itens, { desc: "", valor: "" }] })} style={{ marginTop: 6, border: "1px dashed #FF6A00", background: "#fff8f1", color: "#FF6A00", borderRadius: 8, padding: "4px 10px", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}><Plus size={13} /> Adicionar item</button>
       )}
     </div>
@@ -43,14 +45,14 @@ const Itens = ({ f, set, cap }) => {
 };
 
 const Total = ({ valor, label = "Total" }) => (
-  <div data-testid="flyer-total" style={{ background: "#1c1a18", color: "#fff", borderRadius: 10, padding: "8px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-    <span style={{ fontWeight: 800, fontSize: 12, letterSpacing: 1, textTransform: "uppercase" }}>{label}</span>
-    <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800, fontSize: 24, color: "#FF8A3C" }}>{fmtBRL(valor)}</span>
+  <div data-testid="flyer-total" style={{ background: "#1c1a18", color: "#fff", borderRadius: 10, padding: "0 12px", height: 40, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <span style={{ fontWeight: 800, fontSize: 12, letterSpacing: 1, textTransform: "uppercase", lineHeight: "16px", display: "block" }}>{label}</span>
+    <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800, fontSize: 24, lineHeight: "28px", display: "block", color: "#FF8A3C" }}>{fmtBRL(valor)}</span>
   </div>
 );
 
 const Assinatura = ({ cfg }) => (
-  <div style={{ textAlign: "center", marginTop: 22 }}>
+  <div style={{ textAlign: "center", marginTop: 14 }}>
     <div style={{ width: 230, margin: "0 auto", borderTop: "1px solid #1a1a1a", paddingTop: 3, fontSize: 11, fontWeight: 700 }}>Assinatura do técnico</div>
     <div style={{ fontSize: 10, color: "#666" }}>{cfg.tecnico || "MVL Fogões"}</div>
   </div>
@@ -58,9 +60,10 @@ const Assinatura = ({ cfg }) => (
 
 const DataLocal = ({ f, set, cap }) => {
   const c = (k, w, ph) => <div style={{ width: w }}><Cell cap={cap} value={f[k]} onChange={(v) => set({ ...f, [k]: v })} testid={`flyer-input-${k}`} placeholder={ph} style={{ textAlign: "center", fontSize: 13 }} /></div>;
+  const t = (s) => <span style={{ display: "block", lineHeight: "20px", paddingBottom: 5 }}>{s}</span>;
   return (
     <div data-testid="flyer-recibo-data" style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 5, fontSize: 13, fontWeight: 600 }}>
-      <span>Bicas, MG</span>{c("dia", 38, "dia")}<span>de</span>{c("mes", 110, "mês")}<span>de 20</span>{c("ano", 28, "")}<span>.</span>
+      {t("Bicas, MG")}{c("dia", 38, "dia")}{t("de")}{c("mes", 110, "mês")}{t("de 20")}{c("ano", 28, "")}{t(".")}
     </div>
   );
 };
@@ -94,6 +97,7 @@ export const MODELOS = {
   },
   orcamento: {
     titulo: "ORÇAMENTO",
+    compacto: true,
     modal: "Flyer de Orçamento",
     arquivo: "orcamento",
     campos: [["nome", "Cliente"], ["tel", "Telefone"], ["end", "Endereço"], ["cidade", "Cidade"], ["outros", "Outros itens"], ["validade", "Validade"]],
@@ -104,21 +108,22 @@ export const MODELOS = {
     }),
     texto: (f, cfg) => linhas(["*MVL FOGÕES* 🔥", "*ORÇAMENTO*", "",
       `👤 *Cliente:* ${f.nome || "—"}`, f.end ? `📍 *Endereço:* ${f.end}${f.cidade ? ` — ${f.cidade}` : ""}` : null, "",
-      ...f.itens.filter((it) => it.desc || it.valor).map((it, i) => `${i + 1}. ${it.desc || "—"}${it.valor ? ` — ${it.valor}` : ""}`),
+      ...f.itens.filter((it) => it.desc || it.valor).map((it, i) => `${i + 1}. ${it.desc || "—"}${it.valor ? ` — ${fmtBRL(num(it.valor))}` : ""}`),
       f.outros ? f.outros : null, "", `💰 *TOTAL:* ${fmtBRL(totalOrc(f))}`,
       f.validade ? `⏳ *Validade:* ${f.validade}` : null, f.pagamento ? `💳 *Pagamento:* ${f.pagamento}` : null, ...fim(cfg)]),
     Body: (p) => (
       <>
         <ClienteRows {...p} />
         <Itens {...p} />
-        <Texto label="Outros itens e valores (texto livre)" k="outros" testid="flyer-input-outros" placeholder={"Ex.: Mangueira de gás R$ 35,00\nUse R$ para somar no total"} maxLines={4} minHeight={58} {...p} />
+        <Texto label="Outros itens e valores (texto livre)" k="outros" testid="flyer-input-outros" placeholder={"Ex.: Mangueira de gás R$ 35,00\nUse R$ para somar no total"} maxLines={3} {...p} />
         <Total valor={totalOrc(p.f)} />
-        <div style={row}><Field label="Validade" k="validade" flex={0.7} testid="flyer-input-validade" {...p} /><Field label="Pagamento" k="pagamento" testid="flyer-input-pagamento" {...p} /></div>
+        <div style={row}><Field label="Validade" k="validade" flex={0.6} testid="flyer-input-validade" {...p} /><Field label="Pagamento" k="pagamento" testid="flyer-input-pagamento" {...p} /></div>
       </>
     ),
   },
   recibo: {
     titulo: "RECIBO",
+    compacto: true,
     modal: "Flyer de Recibo",
     arquivo: "recibo",
     campos: [["nome", "Cliente"], ["tel", "Telefone"], ["end", "Endereço"], ["cidade", "Cidade"], ["valor", "Valor"], ["servico", "Referente a"], ["garantia", "Garantia"], ["obs", "Obs"]],
@@ -134,10 +139,10 @@ export const MODELOS = {
     Body: (p) => (
       <>
         <ClienteRows {...p} />
-        <div style={destaque}><Field label="Valor recebido" k="valor" flex={1.3} testid="flyer-input-valor" style={{ fontSize: 17, fontWeight: 800, lineHeight: "24px" }} {...p} /><Field label="Garantia (dias)" k="garantia" testid="flyer-input-garantia" {...p} /></div>
+        <div style={destaque}><Field label="Valor recebido" k="valor" flex={1.3} testid="flyer-input-valor" style={{ fontSize: 17, fontWeight: 800, lineHeight: "24px" }} {...p} f={p.cap && p.f.valor ? { ...p.f, valor: fmtBRL(num(p.f.valor)) } : p.f} /><Field label="Garantia (dias)" k="garantia" testid="flyer-input-garantia" placeholder="ex.: 90" {...p} f={p.cap && p.f.garantia ? { ...p.f, garantia: `${p.f.garantia} dias` } : p.f} /></div>
         <div><div style={lbl}>Valor por extenso</div><div style={{ ...val, fontSize: 12, fontStyle: "italic", borderBottom: "1px solid #d6d0c7", minHeight: 22 }} data-testid="flyer-extenso">{p.f.extenso ? `(${p.f.extenso})` : "\u00a0"}</div></div>
         <Field label="Referente a" k="servico" testid="flyer-input-servico" {...p} />
-        <Texto label="Peças / observações" k="obs" testid="flyer-input-obs" maxLines={4} minHeight={50} {...p} />
+        <Texto label="Peças / observações" k="obs" testid="flyer-input-obs" maxLines={3} {...p} />
         <DataLocal {...p} />
         <Assinatura cfg={p.cfg} />
       </>

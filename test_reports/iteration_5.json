@@ -1,0 +1,36 @@
+{
+  "summary": "Frontend-only test on mobile (390x844) of the new Orçamento and Recibo flyers, plus a regression check of the Agenda flyer. Seeded a client (Bicas), an OS (servico 'Troca de válvula', pecas 'Válvula de segurança', valor 120) and an agendamento via the API. All of it was deleted afterwards. WORKING: The wa-cli-sheet shows all 5 buttons (open-chat, send-flyer, flyer-from-chat, orcamento, recibo). ORÇAMENTO: title 'Flyer de Orçamento'. Client fields are pre-filled (nome, tel, end, cidade 'Bicas - MG'). The items are pre-filled from the latest OS (row 1: 'Troca de válvula' R$ 120,00; row 2: 'Válvula de segurança' with no value). The total updates live: 120 -> +45,00 = 165 -> +'Mangueira R$35,00' = R$ 200,00. Add stops at 6 rows (the button hides) and remove works. The validade default is '7 dias' and pagamento is 'Pix, dinheiro ou cartão'. Toggling conversa shows and hides the panel, which has the orçamento campos. The download gives orcamento-*.png, and the send fallback opens api.whatsapp.com with the correct text. RECIBO: title 'Flyer de Recibo'. Valor is pre-filled 'R$ 120,00' with extenso '(cento e vinte reais)'. 'R$ 1.250,50' gives 'mil duzentos e cinquenta reais e cinquenta centavos', 150 gives 'cento e cinquenta reais', 100 gives 'cem reais', 1 gives 'um real'; 1001, 21,01 and 0,99 are also correct. Garantia, dia, mes and ano start empty. The data line reads 'Bicas, MG __ de __ de 20__.' The signature shows the technician from config ('Marcos Vinícius'). conversa-auto-btn with 'R$ 80' set valor to 'R$ 80' and extenso to 'oitenta reais'. Download and send work, and the WhatsApp text has 'Garantia: 90 dias' and 'Bicas, MG 28 de outubro de 2026.' REGRESSION: the Agenda flyer is unchanged (title, all fields, tipo cooktop pre-checked then switched to forno, conversa toggle, download). No page errors. FAILURES: (1) the layout overflows into the footer on both new flyers, and in the PNG content is cut off; (2) num() parses dot-thousands without a comma wrongly.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Recibo flyer layout (flyerModelos.js recibo.Body / Assinatura)", "issue": "Even with the default pre-filled data, the signature block sits under the footer. In the downloaded PNG the 'Assinatura do técnico' label is cut in half and the technician name is not visible. The 'Peças / observações' box shrinks to about 1 line, so its text is cut at the bottom (Texto flex:1 with minHeight 50 loses space). The requirement says no clipped text and the footer visible, so this fails.", "selector": "[data-testid='flyer-canvas']", "priority": "HIGH"},
+      {"component": "Orçamento flyer layout with many items", "issue": "With 6 filled rows plus a 4-line 'outros' text, the content overflows the fixed 720px canvas. The 'outros' textarea collapses to 1 line (lines 2-4 hidden), flyer-total is cut by the footer, and Validade/Pagamento are not visible in either the live view or the PNG. Already with 5 rows (empty ones are shown in the live view), Validade/Pagamento are pushed under the footer. Fix options: reduce row height/font, cap items so they fit, put validade and pagamento on the same row as the total, or auto-shrink.", "selector": "[data-testid='flyer-total'], [data-testid='flyer-input-validade']", "priority": "HIGH"},
+      {"component": "num() in flyerParts.js", "issue": "When there is no comma, a dot is treated as a decimal point. '1.250' becomes 1.25 (extenso shows 'um real e vinte e cinco centavos'), '2.000.000' becomes 2 ('dois reais'), and 'R$ 1.200' in the outros text adds 1,20 to the total instead of 1200. Brazilian users often write values this way. Fix: if there is no comma and the text matches /^\\d{1,3}(\\.\\d{3})+$/, strip the dots.", "selector": "[data-testid='flyer-input-valor'], [data-testid='flyer-input-outros']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Recibo PNG data line", "issues": ["In the html2canvas output, the filled values (28 / outubro / 26) sit a few px above the baseline of the 'Bicas, MG ... de ... de 20' text, so they look misaligned."]},
+      {"screen": "Orçamento PNG total bar", "issues": ["The 'TOTAL' label and the R$ value are not vertically centered in the dark bar in the PNG (the value sits low). The live view is fine."]},
+      {"screen": "Recibo garantia placeholder", "issues": ["The 'toque para preencher' placeholder is truncated in the narrow Garantia (dias) field. Use a shorter placeholder like 'ex.: 90'."]},
+      {"screen": "Orçamento WhatsApp text", "issues": ["Item values are sent raw as typed (e.g. '— 10') instead of formatted (R$ 10,00), while the PNG shows them formatted."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix the Recibo layout so the signature line, technician name and the obs text fit above the footer in both the live view and the PNG (reduce gaps/fonts, give Texto a fixed height, or shrink the header area for this model)",
+    "Fix the Orçamento overflow with up to 6 items plus multi-line outros: the total, validade and pagamento must always be visible; consider limiting items or compacting rows",
+    "Fix num() to handle dot-thousand formats without a comma ('1.250', '2.000.000', 'R$ 1.200')",
+    "Optional: align the date-line values and the total bar vertically in the html2canvas output; shorten the garantia placeholder; format item values in the orçamento WhatsApp text"
+  ],
+  "critical_code_review_comments": [
+    "The flyer canvas has a fixed height (720) with overflow hidden, so any model with variable content (itens, outros) can silently clip. Add a test or measure for overflow and auto-scale the body, or warn the user.",
+    "valoresTexto regex /R\\$\\s*([\\d.,]+)/ inherits the num() bug. Values written without 'R$' are ignored by design; the placeholder explains this, which is fine.",
+    "Ordem.garantia is in months in the backend, while the recibo garantia is entered manually in days (as requested). This is fine, but be careful not to pre-fill it from the OS later."
+  ],
+  "updated_files": ["/app/test_reports/iteration_5.json"],
+  "success_rate": {"backend": "N/A", "frontend": "85%"},
+  "seed_data_creation": "Created the client 'TEST_Flyer Cliente', an OS and an agendamento via the API; all deleted after testing.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Seed: create a client plus an OS (servico, pecas, valor) and an agendamento via /api. Open with mnav-whatsapp-button -> wa-cli-{id} -> wa-sheet-orcamento/recibo. To check overflow, compare the bounding rect of flyer-input-pagamento / the signature div against the footer (flyer-canvas lastElementChild) top, and view the downloaded PNG. Retest: 6 items plus 4 outros lines; recibo with the default data; num('1.250') should be 1250."
+}

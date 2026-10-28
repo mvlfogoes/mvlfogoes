@@ -17,6 +17,7 @@ export const num = (s) => {
   if (typeof s === "number") return s;
   let t = String(s || "").replace(/[^\d,.-]/g, "");
   if (t.includes(",")) t = t.replace(/\./g, "").replace(",", ".");
+  else if (/^\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, "");
   return parseFloat(t) || 0;
 };
 
@@ -48,22 +49,22 @@ export const extenso = (v) => {
 };
 
 export const Cell = ({ value, onChange, cap, style, testid, placeholder = "toque para preencher" }) =>
-  cap ? <div style={{ ...val, borderBottom: "1px solid #d6d0c7", whiteSpace: "nowrap", overflow: "hidden", ...style }}>{value || "\u00a0"}</div>
+  cap ? <div style={{ ...val, borderBottom: "1px solid #d6d0c7", whiteSpace: "nowrap", overflow: "hidden", ...style }}><span data-txt="1" style={{ position: "relative" }}>{value || "\u00a0"}</span></div>
     : <input data-testid={testid} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} style={{ ...val, ...style }} />;
 
-export const Field = ({ label, k, f, set, cap, flex = 1, testid, style }) => (
+export const Field = ({ label, k, f, set, cap, flex = 1, testid, style, placeholder }) => (
   <div style={{ flex, minWidth: 0 }}>
     <div style={lbl}>{label}</div>
-    <Cell value={f[k]} onChange={(v) => set({ ...f, [k]: v })} cap={cap} testid={testid} style={style} />
+    <Cell value={f[k]} onChange={(v) => set({ ...f, [k]: v })} cap={cap} testid={testid} style={style} placeholder={placeholder} />
   </div>
 );
 
-export const Texto = ({ label, k, f, set, cap, testid, placeholder, maxLines = 6, minHeight = 60 }) => {
-  const box = { ...val, fontSize: 12, fontWeight: 500, color: "#333", lineHeight: "17px", border: "1px solid #e4ded5", borderBottom: "1px solid #e4ded5", borderRadius: 8, padding: 8, height: "100%", resize: "none", whiteSpace: "pre-wrap", overflow: "hidden", display: "block", flex: 1 };
+export const Texto = ({ label, k, f, set, cap, testid, placeholder, maxLines = 6 }) => {
+  const box = { ...val, fontSize: 12, fontWeight: 500, color: "#333", lineHeight: "17px", border: "1px solid #e4ded5", borderBottom: "1px solid #e4ded5", borderRadius: 8, padding: "7px 8px", height: maxLines * 17 + 16, minHeight: 0, resize: "none", whiteSpace: "pre-wrap", overflow: "hidden", display: "block" };
   return (
-    <div style={{ flex: 1, minHeight, display: "flex", flexDirection: "column" }}>
+    <div>
       <div style={{ ...lbl, marginBottom: 5 }}>{label}</div>
-      {cap ? <div style={box}>{f[k]}</div>
+      {cap ? <div style={box}><span data-txt="1" style={{ position: "relative", display: "block" }}>{f[k]}</span></div>
         : <textarea data-testid={testid} maxLength={240} value={f[k]} placeholder={placeholder} onChange={(e) => set({ ...f, [k]: e.target.value.split("\n").slice(0, maxLines).join("\n") })} style={box} />}
     </div>
   );
@@ -71,15 +72,15 @@ export const Texto = ({ label, k, f, set, cap, testid, placeholder, maxLines = 6
 
 const ico = { display: "block", flexShrink: 0 };
 
-export const Header = ({ cfg, titulo }) => (
-  <div style={{ background: "#1c1a18", color: "#fff", padding: "14px 16px 12px", textAlign: "center" }}>
-    <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800, fontSize: 36, lineHeight: 1 }}>
+export const Header = ({ cfg, titulo, compacto }) => (
+  <div style={{ background: "#1c1a18", color: "#fff", padding: compacto ? "10px 16px 9px" : "14px 16px 12px", textAlign: "center" }}>
+    <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800, fontSize: compacto ? 30 : 36, lineHeight: 1 }}>
       MVL <span style={{ color: "#FF6A00" }}>FOGÕES</span>
     </div>
-    <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800, fontSize: 22, marginTop: 6 }}>{titulo}</div>
+    <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800, fontSize: 22, marginTop: compacto ? 3 : 6 }}>{titulo}</div>
     <div style={{ fontSize: 9, letterSpacing: 2, color: "#cfcfcf", marginTop: 2 }}>ASSISTÊNCIA TÉCNICA ESPECIALIZADA</div>
-    <div style={{ color: "#FF8A3C", fontWeight: 700, fontSize: 11, marginTop: 6 }}>{(cfg.slogan || "Qualidade que dá confiança!").toUpperCase()}</div>
-    <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: 8, fontSize: 10, fontWeight: 700 }}>
+    {!compacto && <div style={{ color: "#FF8A3C", fontWeight: 700, fontSize: 11, marginTop: 6 }}>{(cfg.slogan || "Qualidade que dá confiança!").toUpperCase()}</div>}
+    <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: compacto ? 6 : 8, fontSize: 10, fontWeight: 700 }}>
       <span style={{ display: "flex", alignItems: "center", gap: 4 }}><ShieldCheck size={12} color="#FF8A3C" data-ico="1" style={ico} /> SEGURANÇA</span>
       <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Star size={12} color="#FFCC00" data-ico="1" style={ico} /> QUALIDADE</span>
       <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Handshake size={12} color="#FF8A3C" data-ico="1" style={ico} /> CONFIANÇA</span>
