@@ -1,0 +1,25 @@
+{
+  "summary": "Iteration 8: Tested printing (Imprimir) and the backend fixes. Backend: 30/30 pytest passed. This includes the new test_iter8_cascade.py: image/jpg is accepted and served back, and DELETE /api/clientes/{cid} soft-deletes the client's fotos and documentos, which then disappear from the lists and their img routes return 404. Frontend at 390x844 with window.print replaced by a counter: Central WhatsApp > wa-cli > wa-sheet-orcamento shows flyer-print-btn, and all 4 action buttons fit in the bar. One click calls window.print exactly once and appends #print-area to body with a blob: img (1215x2160). Under emulateMedia('print') every other body child is display:none, #print-area is flex and centered, and the body background is white; the screenshot shows only the flyer on a white page. Under screen media #print-area is display:none. Recibo has flyer-print-btn. The agenda flyer has none, from both wa-sheet-send-flyer and agenda-flyer-{id}. In the ficha docs-cliente, doc-viewer-print shows for recibo and orcamento and calls window.print, and is absent for the visita doc. Visita resumo is '28/10/2026 às 14:30' with a date and '' without one. Regression: flyer-download-btn downloads orcamento-TEST_Print-Cli.png. flyer-send-btn with no share API downloads the image and opens api.whatsapp.com/send?phone=5532988887777&text=. flyer-save-btn shows the toast. No page errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Ficha Arquivo", "issues": ["A visita doc with empty resumo falls back to quando(ts), so the card shows the same timestamp twice (line 2 and line 3). Consider showing 'Sem data' or hiding line 2 when resumo is empty"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter8_cascade.py", "/app/backend/tests/test_fotos_documentos.py", "/app/backend/tests/test_mvl_crm.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Optional: in imprimir(), remove any existing #print-area/style before adding a new one. If afterprint does not fire (some mobile browsers, or the user prints twice within 60s), two #print-area nodes with the same id stay in the DOM at once and both print"
+  ],
+  "critical_code_review_comments": [
+    "imprimir() calls window.print() after an async html2canvas plus img.onload. On iOS Safari, print outside a user gesture usually still works, but some Android WebViews/PWAs may ignore it. Confirm on a real device",
+    "FlyerModal imprimirFlyer does not await imprimir(), so busy resets right away. This is fine, but a double-tap creates 2 print areas (see action item)"
+  ],
+  "updated_files": ["/app/backend/tests/test_iter8_cascade.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "None left. The TEST_Print Cli client, its 4 docs and its agendamento were removed through the client DELETE cascade",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Mock print with add_init_script('window.__p=0;window.print=()=>{window.__p++}'). Because afterprint never fires, #print-area stays for 60s and can be inspected; use page.emulate_media(media='print') to check visibility. Create a test client via the API with a wa number so it shows in Central WhatsApp (wa-cli-{id}). DELETE of the client now cascades docs and fotos and also removes agendamentos, so cleanup is easy."
+}

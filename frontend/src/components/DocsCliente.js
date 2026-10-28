@@ -46,7 +46,7 @@ export function DocsCliente({ cli }) {
                 <div className="aspect-[9/16] bg-white"><img src={docUrl(d.id)} alt={label} loading="lazy" className="w-full h-full object-cover object-top" /></div>
                 <div className="p-2">
                   <p className="text-[11px] font-semibold flex items-center gap-1 text-orange-300"><Icon size={11} /> {label}</p>
-                  <p className="text-[10px] text-zinc-500 truncate">{d.resumo || quando(d.ts)}</p>
+                  {d.resumo && <p className="text-[10px] text-zinc-500 truncate">{d.resumo}</p>}
                   <p className="text-[10px] text-zinc-600">{quando(d.ts)}</p>
                 </div>
               </button>

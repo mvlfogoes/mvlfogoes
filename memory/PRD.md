@@ -16,6 +16,9 @@ FastAPI + MongoDB (motor) / React 19 + Vite + Tailwind v4 / PWA (manifest + sw.j
 - Limitação: o WhatsApp não permite que apps leiam conversas/etiquetas; os dados vêm copiados e colados
 - 2026-06: Seleção de cidade (botões) no cadastro/edição de cliente
 - 2026-06: Flyers de Orçamento e Recibo (Central WhatsApp → cliente). Orçamento: até 5 itens com valor + texto livre (valores com R$ somam), total automático, validade e pagamento. Recibo: valor + extenso automático, garantia em dias manual, "Bicas, MG __ de ____ de 20__", assinatura do técnico. Arquitetura: flyerParts.js (peças visuais), flyerModelos.js (agenda/orcamento/recibo), FlyerModal.js genérico (prop modelo)
+- 2026-06: Fotos do fogão por cliente (Emergent Object Storage, coleção `fotos`, soft-delete), miniaturas na ficha e no cadastro, visualizador em tela cheia com zoom de pinça (ZoomViewer)
+- 2026-06: Flyers enviados só como imagem (sem texto). Datas automáticas no orçamento (Data) e recibo (dia/mês/ano). Botão Guardar → coleção `documentos` + imagem no storage; seção "Arquivo" na ficha do cliente com filtros, reenviar, baixar, imprimir, excluir
+- 2026-06: Imprimir (orçamento/recibo, também no arquivo): gera PNG e abre a tela de impressão do sistema (A4); o celular lista as impressoras Wi-Fi (Mopria/AirPrint)
 
 ## Backlog
 - P2: pequeno desalinhamento dos ícones no PNG exportado (html2canvas)
