@@ -1,0 +1,33 @@
+{
+  "summary": "Iteration 7: Tested the stove photos (fotos), saved documents (documentos) and flyer changes. Backend: 28/28 pytest passed, including the new test_fotos_documentos.py (photo upload/list/img/soft-delete, non-image 400, doc lifecycle for agenda|orcamento|recibo, invalid tipo/dados 400, img 404 after delete) and the previous regression suite. Frontend at 390x844: New client modal shows thumbnails for picked photos and uploads them on save (2 thumbs appeared in the ficha). In the ficha, adding a photo uploads it right away. Thumbnails open a fullscreen foto-viewer (portrait image 390x585, object-contain); double-tap zooms to 2.5x; close and delete-with-confirm both work. Orçamento flyer-input-data = today 28/10/2026 and can be edited. Recibo dia/mes/ano = 28/outubro/26. flyer-send-btn with no share API downloads the PNG and opens api.whatsapp.com/send?phone=5532988887777&text= (empty text). With the share API mocked, the payload has only {files:[png]} and no text. Guardar shows the toast 'Guardado no arquivo do cliente' for orçamento, recibo and visita. The ficha 'Arquivo (3)' and its filters work (todos 3 / agenda 1 / orcamento 1 / recibo 1). doc-viewer send, download and delete work (count goes to 2). Agenda regression: agenda-flyer saves with tipo agenda and resumo 'Visita 28/10/2026 09:00'. No page errors. All test data cleaned up, including the smoke-test recibo and 1px photo for João Silva.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "DELETE /api/clientes/{cid}", "issue": "Does not delete or soft-delete the client's fotos and documentos (it only removes ordens/agendamentos/midias), so orphaned records and stored objects are left behind."},
+      {"endpoint": "POST /api/clientes/{cid}/fotos, /api/documentos", "issue": "Only image/jpeg|png|webp|heic are accepted. Some Android browsers send 'image/jpg' or an empty content type, and these get a 400. The frontend usually re-encodes to jpeg with comprimir(), but if canvas fails (e.g. HEIC on Chrome) the original file is sent. The cliId is not checked to exist."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Ficha Arquivo", "issues": ["A visita doc with no date shows resumo 'Visita', which repeats the type label", "The ficha MapPin city line only shows when etiqueta (city) is set. This is expected, but a client created without a city shows no location line"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_fotos_documentos.py", "/app/backend/tests/test_mvl_crm.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Optional: in delete_cliente, also soft-delete db.fotos and db.documentos with that cliId",
+    "Optional: accept image/jpg and image/gif, or fall back on the file extension when content_type is missing",
+    "Optional: navigator.share is called after async html2canvas (scale 3). On slow phones or iOS Safari the user activation can expire and share fails with NotAllowedError. Consider generating the blob before share or falling back to download on NotAllowedError"
+  ],
+  "critical_code_review_comments": [
+    "storage._req does not re-init the storage key on 401/403, so it could fail if the key expires",
+    "FotosFogao remove() has no try/catch, so a failed deleteFoto API call gives an unhandled rejection and no error toast"
+  ],
+  "updated_files": ["/app/backend/tests/test_fotos_documentos.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "None left. TEST_ client, its photos and docs, the João Silva smoke recibo and photo, and the agenda doc were all deleted",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Mobile 390x844, state routing via mnav-{id}-button. Fotos: client-fotos-input (modal), ficha-fotos-input / ficha-fotos-thumb-{i} / foto-viewer(-img|-close|-delete). Docs: docs-cliente, docs-filtro-*, button[data-testid^=doc-], doc-viewer-send/download/delete. To test the share path, mock navigator.canShare/share via add_init_script; with canShare=undefined it falls back to download + window.open of the wa link."
+}

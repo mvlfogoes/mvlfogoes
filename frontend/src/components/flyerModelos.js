@@ -79,7 +79,7 @@ export const MODELOS = {
       ...base(s, cli, cfg), data: s.data ? fmtData(s.data) : "", hora: s.hora || "", tipo: tipoDe(s),
       servico: s.servico || "", taxa: s.valor ? fmtBRL(s.valor) : "", obs: [OBS_PADRAO, s.obs].filter(Boolean).join("\n"),
     }),
-    resumo: (f) => `Visita ${f.data || ""} ${f.hora || ""}`.trim(),
+    resumo: (f) => [f.data, f.hora].filter(Boolean).join(" às "),
     Body: (p) => (
       <>
         <ClienteRows {...p} />
@@ -93,6 +93,7 @@ export const MODELOS = {
   orcamento: {
     titulo: "ORÇAMENTO",
     compacto: true,
+    imprimir: true,
     modal: "Flyer de Orçamento",
     arquivo: "orcamento",
     campos: [["nome", "Cliente"], ["tel", "Telefone"], ["end", "Endereço"], ["cidade", "Cidade"], ["outros", "Outros itens"], ["validade", "Validade"]],
@@ -115,6 +116,7 @@ export const MODELOS = {
   recibo: {
     titulo: "RECIBO",
     compacto: true,
+    imprimir: true,
     modal: "Flyer de Recibo",
     arquivo: "recibo",
     campos: [["nome", "Cliente"], ["tel", "Telefone"], ["end", "Endereço"], ["cidade", "Cidade"], ["valor", "Valor"], ["servico", "Referente a"], ["garantia", "Garantia"], ["obs", "Obs"]],

@@ -185,6 +185,8 @@ async def delete_cliente(cid: str):
     await db.ordens.delete_many({"cliId": cid})
     await db.agendamentos.delete_many({"cliId": cid})
     await db.midias.delete_many({"cliId": cid})
+    await db.fotos.update_many({"cliId": cid}, {"$set": {"is_deleted": True}})
+    await db.documentos.update_many({"cliId": cid}, {"$set": {"is_deleted": True}})
     return {"ok": True}
 
 
@@ -272,7 +274,7 @@ async def delete_midia(mid: str):
 
 
 # ---------------- Fotos do fogão ----------------
-IMG_TYPES = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/heic": "heic"}
+IMG_TYPES = {"image/jpeg": "jpg", "image/jpg": "jpg", "image/png": "png", "image/webp": "webp", "image/heic": "heic", "image/heif": "heif"}
 MAX_BYTES = 12 * 1024 * 1024
 
 

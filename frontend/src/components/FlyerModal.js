@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
-import { X, Send, Download, Pencil, ClipboardPaste, Archive } from "lucide-react";
+import { X, Send, Download, Pencil, ClipboardPaste, Archive, Printer } from "lucide-react";
 import { api } from "@/lib/api";
-import { baixarBlob, compartilhar } from "@/lib/media";
+import { baixarBlob, compartilhar, imprimir } from "@/lib/media";
 import { ConversaPanel } from "@/components/ConversaPanel";
 import { W, H, Header, Solucoes, Footer } from "@/components/flyerParts";
 import { MODELOS } from "@/components/flyerModelos";
@@ -77,6 +77,7 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false,
     await api.saveDoc({ blob, tipo: modelo, cliId: cli?.id || ag?.cliId, nomeCli: f.nome, resumo: M.resumo(f), dados: f });
     toast.success("Guardado no arquivo do cliente");
   }, "Não foi possível guardar");
+  const imprimirFlyer = acao((blob) => { imprimir(blob).catch(() => toast.error("Não foi possível imprimir")); }, "Não foi possível imprimir");
 
   return createPortal(
     <div className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-sm flex flex-col" data-testid="flyer-modal">
@@ -101,6 +102,7 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false,
       <div className="glass border-t border-orange-500/20 p-3 flex gap-2">
         <button onClick={enviar} disabled={busy} data-testid="flyer-send-btn" className="fire-btn text-white flex-1 rounded-xl py-3 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"><Send size={17} /> {busy ? "Gerando..." : "Enviar"}</button>
         <button onClick={guardar} disabled={busy} data-testid="flyer-save-btn" className="border border-orange-500/40 text-orange-400 rounded-xl px-3 py-3 font-semibold flex items-center gap-1.5 disabled:opacity-50"><Archive size={17} /> Guardar</button>
+        {M.imprimir && <button onClick={imprimirFlyer} disabled={busy} data-testid="flyer-print-btn" aria-label="Imprimir" className="border border-orange-500/40 text-orange-400 rounded-xl px-3 py-3 font-semibold flex items-center gap-2 disabled:opacity-50"><Printer size={17} /></button>}
         <button onClick={baixar} disabled={busy} data-testid="flyer-download-btn" aria-label="Baixar imagem" className="border border-orange-500/40 text-orange-400 rounded-xl px-3 py-3 font-semibold flex items-center gap-2 disabled:opacity-50"><Download size={17} /></button>
       </div>
     </div>,

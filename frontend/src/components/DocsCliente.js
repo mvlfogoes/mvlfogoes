@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { FileText, CalendarCheck, Calculator, Receipt, Send, Download, Trash2 } from "lucide-react";
+import { FileText, CalendarCheck, Calculator, Receipt, Send, Download, Trash2, Printer } from "lucide-react";
 import { api, docUrl } from "@/lib/api";
-import { compartilhar, baixarBlob } from "@/lib/media";
+import { compartilhar, baixarBlob, imprimir } from "@/lib/media";
 import { Empty, SectionTitle } from "@/lib/ui";
 import { ZoomViewer } from "@/components/ZoomViewer";
 
@@ -58,6 +58,7 @@ export function DocsCliente({ cli }) {
         <ZoomViewer src={docUrl(ver.id)} onClose={() => setVer(null)} testid="doc-viewer">
           <button onClick={() => enviar(ver)} data-testid="doc-viewer-send" className="fire-btn text-white flex-1 rounded-xl py-3 font-semibold flex items-center justify-center gap-2"><Send size={17} /> Enviar</button>
           <button onClick={() => baixar(ver)} data-testid="doc-viewer-download" className="border border-orange-500/40 text-orange-400 rounded-xl px-4 py-3"><Download size={17} /></button>
+          {ver.tipo !== "agenda" && <button onClick={async () => { try { await imprimir(await blobDe(ver)); } catch { toast.error("Não foi possível imprimir"); } }} data-testid="doc-viewer-print" aria-label="Imprimir" className="border border-orange-500/40 text-orange-400 rounded-xl px-4 py-3"><Printer size={17} /></button>}
           <button onClick={() => excluir(ver)} data-testid="doc-viewer-delete" className="border border-red-500/40 text-red-400 rounded-xl px-4 py-3"><Trash2 size={17} /></button>
         </ZoomViewer>
       )}
