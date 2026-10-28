@@ -52,7 +52,7 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false,
         onclone: (doc) => {
           doc.querySelector('[data-testid="flyer-canvas"]').parentElement.style.transform = "none";
           const st = doc.createElement("style");
-          st.textContent = "[data-ico]{position:relative;top:2px}[data-lbl]{position:relative;top:-1px}[data-testid=flyer-total] span{position:relative;top:-5px}[data-txt]{top:-4px}";
+          st.textContent = "[data-ico]{position:relative;top:2px}[data-lbl]{position:relative;top:-1px}[data-testid=flyer-total] span{position:relative;top:-5px}[data-testid=flyer-total] span+span{top:-12px}[data-txt]{top:-4px}[data-testid=flyer-recibo-data] [data-txt]{top:0}";
           doc.head.appendChild(st);
         },
       });

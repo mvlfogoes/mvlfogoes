@@ -133,7 +133,7 @@ export const MODELOS = {
     }),
     fix: (n, old) => (n.valor !== old.valor ? { ...n, extenso: extenso(num(n.valor)) } : n),
     texto: (f, cfg) => linhas(["*MVL FOGÕES* 🔥", "*RECIBO*", "",
-      `Recebi de *${f.nome || "—"}* a importância de *${f.valor || "—"}*${f.extenso ? ` (${f.extenso})` : ""}, referente a ${f.servico || "—"}.`, "",
+      `Recebi de *${f.nome || "—"}* a importância de *${f.valor ? fmtBRL(num(f.valor)) : "—"}*${f.extenso ? ` (${f.extenso})` : ""}, referente a ${f.servico || "—"}.`, "",
       f.garantia ? `🛡️ *Garantia:* ${f.garantia} dias` : null, f.obs ? `📝 ${f.obs}` : null, "",
       `Bicas, MG ${f.dia || "____"} de ${f.mes || "__________"} de 20${f.ano || "__"}.`, `✍️ ${cfg.tecnico || "MVL Fogões"}`, ...fim(cfg)]),
     Body: (p) => (

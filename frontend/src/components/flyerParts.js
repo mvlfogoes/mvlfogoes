@@ -65,7 +65,12 @@ export const Texto = ({ label, k, f, set, cap, testid, placeholder, maxLines = 6
     <div>
       <div style={{ ...lbl, marginBottom: 5 }}>{label}</div>
       {cap ? <div style={box}><span data-txt="1" style={{ position: "relative", display: "block" }}>{f[k]}</span></div>
-        : <textarea data-testid={testid} maxLength={240} value={f[k]} placeholder={placeholder} onChange={(e) => set({ ...f, [k]: e.target.value.split("\n").slice(0, maxLines).join("\n") })} style={box} />}
+        : <textarea data-testid={testid} maxLength={240} value={f[k]} placeholder={placeholder} onChange={(e) => {
+          const el = e.target;
+          const v = el.value.split("\n").slice(0, maxLines).join("\n");
+          if (v.length > (f[k] || "").length && el.scrollHeight > el.clientHeight + 1) return;
+          set({ ...f, [k]: v });
+        }} style={box} />}
     </div>
   );
 };

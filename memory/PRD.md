@@ -14,6 +14,8 @@ FastAPI + MongoDB (motor) / React 19 + Vite + Tailwind v4 / PWA (manifest + sw.j
 - 2026-06: Caixa de serviço do flyer marcada de forma visível (caixa laranja com ✓), tipo pré-marcado pelo agendamento ou deduzido do texto do serviço
 - 2026-06: Etiquetas de cidade (Bicas, Mar de Espanha, Pequeri, Maripá de Minas, Guarará, Rochedo de Minas) em Clientes e WhatsApp, com filtro e busca. Ao tocar no cliente na Central WhatsApp: abrir conversa, enviar flyer ou montar o flyer com dados da conversa (colar texto, preencher automático, selecionar trecho → campo)
 - Limitação: o WhatsApp não permite que apps leiam conversas/etiquetas; os dados vêm copiados e colados
+- 2026-06: Seleção de cidade (botões) no cadastro/edição de cliente
+- 2026-06: Flyers de Orçamento e Recibo (Central WhatsApp → cliente). Orçamento: até 5 itens com valor + texto livre (valores com R$ somam), total automático, validade e pagamento. Recibo: valor + extenso automático, garantia em dias manual, "Bicas, MG __ de ____ de 20__", assinatura do técnico. Arquitetura: flyerParts.js (peças visuais), flyerModelos.js (agenda/orcamento/recibo), FlyerModal.js genérico (prop modelo)
 
 ## Backlog
 - P2: pequeno desalinhamento dos ícones no PNG exportado (html2canvas)

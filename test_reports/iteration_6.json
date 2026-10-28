@@ -1,0 +1,31 @@
+{
+  "summary": "Frontend retest of the iteration_5 failures on mobile 390x844, plus a regression check of the Agenda flyer. Seeded a client, an OS and an agenda via the API; all deleted afterwards. PASS (1) Overflow: Orçamento with 5 filled items (flyer-item-add hides at 5) and outros capped at 3 lines (a 4th line is dropped). Total is at 594-630, Validade/Pagamento at 653-679, footer top at 697. All of it is visible live and in the PNG. Recibo with 3 obs lines: the signature (656-675) and technician name (675-688) sit above the footer (697), and the PNG shows the signature, the 'Marcos Vinícius' name and the 3 obs lines with commas and descenders intact. PASS (2) num(): '1.250' gives 'mil duzentos e cinquenta reais' and '2.000.000' gives 'dois milhões de reais'. 'R$ 1.250,50' is correct. Orçamento total: 120 + 45 + '1.250' + '10,5' + 99,90 + outros 'R$ 35,00' + 'R$ 1.200' = R$ 2.760,40, which is correct. PASS (3) The orçamento WhatsApp text formats items as R$ 120,00, R$ 45,00, R$ 1.250,00, R$ 10,50 and R$ 99,90. PASS (4) The garantia placeholder is 'ex.: 90'. The PNG shows 'R$ 1.250,00' when '1.250' is typed, and '90 dias'. REGRESSION PASS: agenda-flyer-{id} from the Agenda list view and wa-sheet-send-flyer both open 'Flyer de Agendamento' with the footer visible and the download working. Six short obs lines fit exactly (scrollHeight 116 = clientHeight 116). No page errors. REMAINING ISSUES: the PNG total-bar value still sits low; long lines that wrap overflow the 'lines-capped' text boxes; minor alignment of the date-line values.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Texto (flyerParts.js) line cap", "issue": "maxLines counts logical '\\n' lines, not wrapped visual lines. Long lines wrap and overflow the fixed-height box, so the last lines are clipped live and in the PNG. Examples: Recibo obs with a long first line plus 2 more lines (scrollHeight 82 > clientHeight 65). Agenda: the default OBS_PADRAO already wraps to 2 visual lines, so an agenda with default plus 5 more lines (6 logical lines) loses the 6th line ('linha6' is missing in the PNG). Fix: check scrollHeight > clientHeight in onChange and reject or trim the input, or lower the cap / shorten OBS_PADRAO.", "selector": "[data-testid='flyer-input-obs'], [data-testid='flyer-input-outros']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Orçamento PNG total bar", "issues": ["The value 'R$ 2.760,40' is still not vertically centered in the html2canvas PNG. Measured at 3x: bar 1629-1748 (center 1688), digits about 1684-1734 (center about 1709), so it is about 7px low at 1x. The 'TOTAL' label is fine (about 2px off). The onclone top:-5px applies equally to both spans; the value span needs a larger offset (about -12px) or a separate rule."]},
+      {"screen": "Recibo PNG date line", "issues": ["Minor: the filled values '28', 'outubro' and '26' still sit a few px above the baseline of 'Bicas, MG ... de ... de 20'."]},
+      {"screen": "Recibo WhatsApp text", "issues": ["Minor: the valor is sent raw as typed ('*1.250*'), while the PNG shows 'R$ 1.250,00'. Use fmtBRL(num(f.valor)) as the orçamento does."]}
+    ]
+  },
+  "test_report_links": ["/app/tests/flyer_orc_iter6.py"],
+  "action_items": [
+    "Make the Texto line cap account for wrapped lines (scrollHeight check), or the agenda default obs plus 5 lines and long recibo/outros lines get clipped",
+    "Adjust the onclone offset for the total value span (Barlow 24px) so it is centered in the PNG bar",
+    "Optional: format the recibo valor in the WhatsApp text; nudge the date-line values in the PNG"
+  ],
+  "critical_code_review_comments": [
+    "The fixed 720px canvas with overflow hidden still relies on logical line caps; a generic overflow guard (compare body scrollHeight to clientHeight and warn) would prevent silent clipping.",
+    "Note: proxAg only selects future agendamentos (data >= hoje). The env date is 2026-10-28, so past seeds open an empty agenda flyer from the WA sheet. This is expected."
+  ],
+  "updated_files": ["/app/tests/flyer_orc_iter6.py", "/app/test_reports/iteration_6.json"],
+  "success_rate": {"backend": "N/A", "frontend": "90%"},
+  "seed_data_creation": "Created the client 'TEST_Flyer6 Cliente', an OS and an agendamento via the API; all deleted.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Navigate with mnav-whatsapp-button -> wa-cli-{id} (click via JS evaluate; a force click can hit the bottom nav) -> wa-sheet-orcamento / wa-sheet-recibo / wa-sheet-send-flyer. Agenda: mnav-agenda-button -> agenda-view-lista -> agenda-flyer-{id}. Save the PNG with expect_download and save_as, then analyze it with PIL (3x scale, 1215x2160). Seed agenda dates after 2026-10-28 so proxAg picks them up."
+}
