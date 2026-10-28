@@ -36,7 +36,7 @@ export function extrair(txt) {
   return r;
 }
 
-export function ConversaPanel({ f, set, cli }) {
+export function ConversaPanel({ f, set, cli, campos = CAMPOS }) {
   const ref = useRef();
   const [txt, setTxt] = useState("");
 
@@ -46,7 +46,9 @@ export function ConversaPanel({ f, set, cli }) {
   };
 
   const auto = () => {
-    const r = extrair(txt);
+    const ex = extrair(txt);
+    if ("valor" in f && ex.taxa) ex.valor = ex.taxa;
+    const r = Object.fromEntries(Object.entries(ex).filter(([k]) => k in f));
     const n = Object.keys(r).length;
     if (!n) return toast.error("Não encontrei dados. Selecione o texto e toque no campo.");
     set({ ...f, ...r });
@@ -57,8 +59,8 @@ export function ConversaPanel({ f, set, cli }) {
     const el = ref.current;
     const sel = el ? txt.slice(el.selectionStart, el.selectionEnd).trim() : "";
     if (!sel) return toast.info("Primeiro selecione um trecho do texto");
-    set({ ...f, [k]: k === "obs" ? `${f.obs}\n${sel}`.trim() : sel });
-    toast.success(`${CAMPOS.find((c) => c[0] === k)[1]} preenchido`);
+    set({ ...f, [k]: k === "obs" || k === "outros" ? `${f[k]}\n${sel}`.trim() : sel });
+    toast.success(`${campos.find((c) => c[0] === k)[1]} preenchido`);
   };
 
   return (
@@ -74,7 +76,7 @@ export function ConversaPanel({ f, set, cli }) {
         <button onClick={auto} data-testid="conversa-auto-btn" className="flex-1 rounded-xl fire-btn text-white py-2 text-xs font-semibold flex items-center justify-center gap-1"><Wand2 size={14} /> Preencher automático</button>
       </div>
       <div className="flex flex-wrap gap-1.5">
-        {CAMPOS.map(([k, l]) => (
+        {campos.map(([k, l]) => (
           <button key={k} onMouseDown={(e) => e.preventDefault()} onClick={() => usarSelecao(k)} data-testid={`conversa-campo-${k}`} className="px-2.5 py-1 rounded-full border border-orange-500/40 text-orange-300 text-[11px] font-semibold">→ {l}</button>
         ))}
       </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, Send, MessageCircle, Sparkles, X, ImageIcon, ClipboardPaste, MapPin } from "lucide-react";
+import { Search, Send, MessageCircle, Sparkles, X, ImageIcon, ClipboardPaste, MapPin, Calculator, Receipt } from "lucide-react";
 import { api, waLink, hoje } from "@/lib/api";
 import { inputCls, Empty, SectionTitle, Btn, Badge } from "@/lib/ui";
 import { useApp } from "@/App";
@@ -18,6 +18,8 @@ const proxAg = (agenda, c) =>
   agenda.filter((a) => a.cliId === c.id && a.status === "agendado" && a.data >= hoje()).sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora))[0]
   || { cliId: c.id, nomeCli: c.nome, servico: "", tipo: "", data: "", hora: "", valor: 0, obs: "" };
 
+const ultOS = (ordens, c) => ordens.filter((o) => o.cliId === c.id).sort((a, b) => (b.data || b.criadoEm || "").localeCompare(a.data || a.criadoEm || ""))[0] || { nomeCli: c.nome };
+
 const ClienteSheet = ({ c, ag, onClose, onFlyer }) => (
   <div className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center" onClick={onClose} data-testid="wa-cli-sheet">
     <div className="glass w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
@@ -32,8 +34,12 @@ const ClienteSheet = ({ c, ag, onClose, onFlyer }) => (
       <a href={waLink(c.wa || c.tel, "")} target="_blank" rel="noreferrer" data-testid="wa-sheet-open-chat" className="block">
         <Btn variant="fire" className="w-full"><MessageCircle size={17} /> Abrir conversa no WhatsApp</Btn>
       </a>
-      <Btn variant="outline" className="w-full" onClick={() => onFlyer(false)} data-testid="wa-sheet-send-flyer"><ImageIcon size={17} /> Enviar flyer</Btn>
-      <Btn variant="outline" className="w-full" onClick={() => onFlyer(true)} data-testid="wa-sheet-flyer-from-chat"><ClipboardPaste size={17} /> Montar flyer com dados da conversa</Btn>
+      <Btn variant="outline" className="w-full" onClick={() => onFlyer(false, "agenda")} data-testid="wa-sheet-send-flyer"><ImageIcon size={17} /> Enviar flyer</Btn>
+      <Btn variant="outline" className="w-full" onClick={() => onFlyer(true, "agenda")} data-testid="wa-sheet-flyer-from-chat"><ClipboardPaste size={17} /> Montar flyer com dados da conversa</Btn>
+      <div className="grid grid-cols-2 gap-2">
+        <Btn variant="outline" className="w-full" onClick={() => onFlyer(false, "orcamento")} data-testid="wa-sheet-orcamento"><Calculator size={17} /> Orçamento</Btn>
+        <Btn variant="outline" className="w-full" onClick={() => onFlyer(false, "recibo")} data-testid="wa-sheet-recibo"><Receipt size={17} /> Recibo</Btn>
+      </div>
     </div>
   </div>
 );
@@ -44,10 +50,11 @@ export default function WhatsAppCentral() {
   const [cidade, setCidade] = useState("");
   const [tpl, setTpl] = useState(TEMPLATES[0]);
   const [agenda, setAgenda] = useState([]);
+  const [ordens, setOrdens] = useState([]);
   const [sel, setSel] = useState(null);
   const [flyer, setFlyer] = useState(null);
 
-  useEffect(() => { api.listAgenda().then(setAgenda); }, []);
+  useEffect(() => { api.listAgenda().then(setAgenda); api.listOrdens().then(setOrdens); }, []);
 
   const list = clientes.filter((c) => (!cidade || c.etiqueta === cidade) && [c.nome, c.tel, c.wa, c.end].join(" ").toLowerCase().includes(q.toLowerCase()));
 
@@ -92,8 +99,8 @@ export default function WhatsAppCentral() {
         </div>
       )}
 
-      {sel && <ClienteSheet c={sel} ag={proxAg(agenda, sel)} onClose={() => setSel(null)} onFlyer={(colar) => { setFlyer({ cli: sel, ag: proxAg(agenda, sel), colar }); setSel(null); }} />}
-      {flyer && <FlyerModal open colar={flyer.colar} onClose={() => setFlyer(null)} ag={flyer.ag} cli={flyer.cli} cfg={cfg} />}
+      {sel && <ClienteSheet c={sel} ag={proxAg(agenda, sel)} onClose={() => setSel(null)} onFlyer={(colar, modelo) => { setFlyer({ cli: sel, ag: modelo === "agenda" ? proxAg(agenda, sel) : ultOS(ordens, sel), colar, modelo }); setSel(null); }} />}
+      {flyer && <FlyerModal open colar={flyer.colar} modelo={flyer.modelo} onClose={() => setFlyer(null)} ag={flyer.ag} cli={flyer.cli} cfg={cfg} />}
     </div>
   );
 }
