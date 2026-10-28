@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
-import { X, Send, Download, Pencil, ClipboardPaste } from "lucide-react";
-import { waLink } from "@/lib/api";
+import { X, Send, Download, Pencil, ClipboardPaste, Archive } from "lucide-react";
+import { api } from "@/lib/api";
+import { baixarBlob, compartilhar } from "@/lib/media";
 import { ConversaPanel } from "@/components/ConversaPanel";
 import { W, H, Header, Solucoes, Footer } from "@/components/flyerParts";
 import { MODELOS } from "@/components/flyerModelos";
@@ -63,39 +64,19 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false,
   };
   const nomeArq = `${M.arquivo}-${(f.nome || "cliente").replace(/\s+/g, "-")}.png`;
 
-  const baixarBlob = (blob) => {
-    const link = document.createElement("a");
-    link.download = nomeArq;
-    link.href = URL.createObjectURL(blob);
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(link.href), 2000);
-  };
-
-  const baixar = async () => {
+  const acao = (fn, erro) => async () => {
     setBusy(true);
-    try { baixarBlob(await gerar()); toast.success("Imagem salva na galeria!"); }
-    catch { toast.error("Não foi possível gerar a imagem"); }
+    try { await fn(await gerar()); }
+    catch (e) { if (e?.name !== "AbortError") toast.error(erro); }
     setBusy(false);
   };
 
-  const enviar = async () => {
-    setBusy(true);
-    const texto = M.texto(f, conf);
-    try {
-      const blob = await gerar();
-      const file = new File([blob], nomeArq, { type: "image/png" });
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], text: texto });
-      } else {
-        baixarBlob(blob);
-        toast.success("Imagem salva! Anexe-a na conversa do WhatsApp.");
-        window.open(waLink(cli?.wa || cli?.tel || f.tel, texto), "_blank");
-      }
-    } catch (e) {
-      if (e?.name !== "AbortError") toast.error("Não foi possível enviar");
-    }
-    setBusy(false);
-  };
+  const baixar = acao((blob) => { baixarBlob(blob, nomeArq); toast.success("Imagem salva na galeria!"); }, "Não foi possível gerar a imagem");
+  const enviar = acao((blob) => compartilhar(blob, nomeArq, cli?.wa || cli?.tel || f.tel), "Não foi possível enviar");
+  const guardar = acao(async (blob) => {
+    await api.saveDoc({ blob, tipo: modelo, cliId: cli?.id || ag?.cliId, nomeCli: f.nome, resumo: M.resumo(f), dados: f });
+    toast.success("Guardado no arquivo do cliente");
+  }, "Não foi possível guardar");
 
   return createPortal(
     <div className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-sm flex flex-col" data-testid="flyer-modal">
@@ -118,8 +99,9 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false,
         </div>
       </div>
       <div className="glass border-t border-orange-500/20 p-3 flex gap-2">
-        <button onClick={enviar} disabled={busy} data-testid="flyer-send-btn" className="fire-btn text-white flex-1 rounded-xl py-3 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"><Send size={17} /> {busy ? "Gerando..." : "Enviar no WhatsApp"}</button>
-        <button onClick={baixar} disabled={busy} data-testid="flyer-download-btn" className="border border-orange-500/40 text-orange-400 rounded-xl px-4 py-3 font-semibold flex items-center gap-2 disabled:opacity-50"><Download size={17} /> Imagem</button>
+        <button onClick={enviar} disabled={busy} data-testid="flyer-send-btn" className="fire-btn text-white flex-1 rounded-xl py-3 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"><Send size={17} /> {busy ? "Gerando..." : "Enviar"}</button>
+        <button onClick={guardar} disabled={busy} data-testid="flyer-save-btn" className="border border-orange-500/40 text-orange-400 rounded-xl px-3 py-3 font-semibold flex items-center gap-1.5 disabled:opacity-50"><Archive size={17} /> Guardar</button>
+        <button onClick={baixar} disabled={busy} data-testid="flyer-download-btn" aria-label="Baixar imagem" className="border border-orange-500/40 text-orange-400 rounded-xl px-3 py-3 font-semibold flex items-center gap-2 disabled:opacity-50"><Download size={17} /></button>
       </div>
     </div>,
     document.body

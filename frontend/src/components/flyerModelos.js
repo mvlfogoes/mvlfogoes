@@ -8,8 +8,9 @@ const cidadeDe = (cli, cfg) => (CIDADES.includes(cli?.etiqueta) ? `${cli.etiquet
 const base = (s, cli, cfg) => ({ nome: s.nomeCli || cli?.nome || "", tel: cli?.tel || "", end: cli?.end || "", cidade: cidadeDe(cli, cfg) });
 const row = { display: "flex", gap: 14 };
 const destaque = { ...row, background: "#fff4ea", borderRadius: 10, padding: "6px 10px" };
-const fim = (cfg) => ["", `📱 *Fale conosco:* ${cfg.telefone || ""}`];
-const linhas = (arr) => arr.filter((l) => l !== null && l !== undefined).join("\n");
+const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+const hojeBR = () => new Date().toLocaleDateString("pt-BR");
+const dataExtenso = (d = new Date()) => ({ dia: String(d.getDate()).padStart(2, "0"), mes: MESES[d.getMonth()], ano: String(d.getFullYear()).slice(2) });
 
 const ClienteRows = (p) => (
   <>
@@ -78,13 +79,7 @@ export const MODELOS = {
       ...base(s, cli, cfg), data: s.data ? fmtData(s.data) : "", hora: s.hora || "", tipo: tipoDe(s),
       servico: s.servico || "", taxa: s.valor ? fmtBRL(s.valor) : "", obs: [OBS_PADRAO, s.obs].filter(Boolean).join("\n"),
     }),
-    texto: (f, cfg) => {
-      const serv = [TIPOS.find((t) => t.key === f.tipo)?.label, f.servico].filter(Boolean).join(" — ") || "—";
-      return linhas(["*MVL FOGÕES* 🔥", "*AGENDAMENTO DE VISITA*", `_${cfg.slogan || "A qualidade que dá confiança!"}_`, "",
-        `👤 *Cliente:* ${f.nome || "—"}`, `📞 *Telefone:* ${f.tel || "—"}`, f.end ? `📍 *Endereço:* ${f.end}` : null, f.cidade ? `🏙️ *Cidade:* ${f.cidade}` : null, "",
-        `📅 *Data da Visita:* ${f.data || "—"}`, `⏰ *Horário:* ${f.hora || "—"}`, `🔧 *Serviço:* ${serv}`, f.taxa ? `💰 *Taxa de Visita:* ${f.taxa}` : null, "",
-        f.obs ? `📝 ${f.obs}` : null, ...fim(cfg)]);
-    },
+    resumo: (f) => `Visita ${f.data || ""} ${f.hora || ""}`.trim(),
     Body: (p) => (
       <>
         <ClienteRows {...p} />
@@ -104,20 +99,16 @@ export const MODELOS = {
     init: (s, cli, cfg) => ({
       ...base(s, cli, cfg),
       itens: [s.servico ? { desc: s.servico, valor: s.valor ? fmtBRL(s.valor) : "" } : null, s.pecas ? { desc: s.pecas, valor: "" } : null].filter(Boolean).concat(s.servico || s.pecas ? [] : [{ desc: "", valor: "" }]),
-      outros: "", validade: "7 dias", pagamento: "Pix, dinheiro ou cartão",
+      outros: "", validade: "7 dias", pagamento: "Pix, dinheiro ou cartão", data: hojeBR(),
     }),
-    texto: (f, cfg) => linhas(["*MVL FOGÕES* 🔥", "*ORÇAMENTO*", "",
-      `👤 *Cliente:* ${f.nome || "—"}`, f.end ? `📍 *Endereço:* ${f.end}${f.cidade ? ` — ${f.cidade}` : ""}` : null, "",
-      ...f.itens.filter((it) => it.desc || it.valor).map((it, i) => `${i + 1}. ${it.desc || "—"}${it.valor ? ` — ${fmtBRL(num(it.valor))}` : ""}`),
-      f.outros ? f.outros : null, "", `💰 *TOTAL:* ${fmtBRL(totalOrc(f))}`,
-      f.validade ? `⏳ *Validade:* ${f.validade}` : null, f.pagamento ? `💳 *Pagamento:* ${f.pagamento}` : null, ...fim(cfg)]),
+    resumo: (f) => `Total ${fmtBRL(totalOrc(f))}`,
     Body: (p) => (
       <>
         <ClienteRows {...p} />
         <Itens {...p} />
         <Texto label="Outros itens e valores (texto livre)" k="outros" testid="flyer-input-outros" placeholder={"Ex.: Mangueira de gás R$ 35,00\nUse R$ para somar no total"} maxLines={3} {...p} />
         <Total valor={totalOrc(p.f)} />
-        <div style={row}><Field label="Validade" k="validade" flex={0.6} testid="flyer-input-validade" {...p} /><Field label="Pagamento" k="pagamento" testid="flyer-input-pagamento" {...p} /></div>
+        <div style={{ ...row, gap: 10 }}><Field label="Data" k="data" flex={0.85} testid="flyer-input-data" {...p} /><Field label="Validade" k="validade" flex={0.65} testid="flyer-input-validade" {...p} /><Field label="Pagamento" k="pagamento" flex={1.3} testid="flyer-input-pagamento" {...p} /></div>
       </>
     ),
   },
@@ -129,13 +120,10 @@ export const MODELOS = {
     campos: [["nome", "Cliente"], ["tel", "Telefone"], ["end", "Endereço"], ["cidade", "Cidade"], ["valor", "Valor"], ["servico", "Referente a"], ["garantia", "Garantia"], ["obs", "Obs"]],
     init: (s, cli, cfg) => ({
       ...base(s, cli, cfg), valor: s.valor ? fmtBRL(s.valor) : "", extenso: extenso(s.valor || 0),
-      servico: s.servico || "", garantia: "", obs: s.pecas ? `Peças: ${s.pecas}` : "", dia: "", mes: "", ano: "",
+      servico: s.servico || "", garantia: "", obs: s.pecas ? `Peças: ${s.pecas}` : "", ...dataExtenso(),
     }),
     fix: (n, old) => (n.valor !== old.valor ? { ...n, extenso: extenso(num(n.valor)) } : n),
-    texto: (f, cfg) => linhas(["*MVL FOGÕES* 🔥", "*RECIBO*", "",
-      `Recebi de *${f.nome || "—"}* a importância de *${f.valor ? fmtBRL(num(f.valor)) : "—"}*${f.extenso ? ` (${f.extenso})` : ""}, referente a ${f.servico || "—"}.`, "",
-      f.garantia ? `🛡️ *Garantia:* ${f.garantia} dias` : null, f.obs ? `📝 ${f.obs}` : null, "",
-      `Bicas, MG ${f.dia || "____"} de ${f.mes || "__________"} de 20${f.ano || "__"}.`, `✍️ ${cfg.tecnico || "MVL Fogões"}`, ...fim(cfg)]),
+    resumo: (f) => (f.valor ? fmtBRL(num(f.valor)) : "Recibo"),
     Body: (p) => (
       <>
         <ClienteRows {...p} />

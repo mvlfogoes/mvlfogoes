@@ -27,11 +27,31 @@ export const api = {
   // config
   getConfig: () => http.get("/config").then((r) => r.data),
   updateConfig: (d) => http.put("/config", d).then((r) => r.data),
+  // fotos do fogão
+  listFotos: (cid) => http.get(`/clientes/${cid}/fotos`).then((r) => r.data),
+  uploadFoto: (cid, blob) => {
+    const fd = new FormData();
+    fd.append("file", blob, `foto.${(blob.type || "image/jpeg").split("/")[1]}`);
+    return http.post(`/clientes/${cid}/fotos`, fd).then((r) => r.data);
+  },
+  deleteFoto: (id) => http.delete(`/fotos/${id}`).then((r) => r.data),
+  // documentos guardados
+  listDocs: (cliId) => http.get("/documentos", { params: cliId ? { cliId } : {} }).then((r) => r.data),
+  saveDoc: ({ blob, tipo, cliId, nomeCli, resumo, dados }) => {
+    const fd = new FormData();
+    fd.append("file", blob, `${tipo}.png`);
+    Object.entries({ tipo, cliId: cliId || "", nomeCli: nomeCli || "", resumo: resumo || "", dados: JSON.stringify(dados || {}) }).forEach(([k, v]) => fd.append(k, v));
+    return http.post("/documentos", fd).then((r) => r.data);
+  },
+  deleteDoc: (id) => http.delete(`/documentos/${id}`).then((r) => r.data),
   // relatorio / backup
   relatorio: (mes) => http.get("/relatorio", { params: { mes } }).then((r) => r.data),
   backup: () => http.get("/backup").then((r) => r.data),
   restore: (d) => http.post("/restore", d).then((r) => r.data),
 };
+
+export const fotoUrl = (id) => `${API}/fotos/${id}/img`;
+export const docUrl = (id) => `${API}/documentos/${id}/img`;
 
 export const fmtBRL = (v) =>
   (Number(v) || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

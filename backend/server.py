@@ -1,8 +1,11 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Form
+from fastapi.responses import Response
+from fastapi.concurrency import run_in_threadpool
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import json
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
@@ -13,6 +16,8 @@ from datetime import datetime, timezone, timedelta
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+import storage
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -266,6 +271,95 @@ async def delete_midia(mid: str):
     return {"ok": True}
 
 
+# ---------------- Fotos do fogão ----------------
+IMG_TYPES = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/heic": "heic"}
+MAX_BYTES = 12 * 1024 * 1024
+
+
+async def _store(folder: str, file: UploadFile):
+    ct = file.content_type or ""
+    if ct not in IMG_TYPES:
+        raise HTTPException(400, "Envie uma imagem (jpg, png ou webp)")
+    data = await file.read()
+    if len(data) > MAX_BYTES:
+        raise HTTPException(400, "Imagem muito grande")
+    path = f"{storage.APP_NAME}/{folder}/{new_id()}.{IMG_TYPES[ct]}"
+    res = await run_in_threadpool(storage.put_object, path, data, ct)
+    return res["path"], ct
+
+
+async def _serve(col, fid: str):
+    doc = await db[col].find_one({"id": fid, "is_deleted": False}, {"_id": 0})
+    if not doc:
+        raise HTTPException(404, "Arquivo não encontrado")
+    data, _ = await run_in_threadpool(storage.get_object, doc["path"])
+    return Response(content=data, media_type=doc["content_type"], headers={"Cache-Control": "public, max-age=31536000, immutable"})
+
+
+@api_router.get("/clientes/{cid}/fotos")
+async def list_fotos(cid: str):
+    return await db.fotos.find({"cliId": cid, "is_deleted": False}, {"_id": 0, "path": 0}).sort("ts", 1).to_list(500)
+
+
+@api_router.post("/clientes/{cid}/fotos")
+async def upload_foto(cid: str, file: UploadFile = File(...)):
+    path, ct = await _store(f"fotos/{cid}", file)
+    doc = {"id": new_id(), "cliId": cid, "path": path, "content_type": ct, "is_deleted": False, "ts": now_iso()}
+    await db.fotos.insert_one(dict(doc))
+    doc.pop("path")
+    return doc
+
+
+@api_router.get("/fotos/{fid}/img")
+async def foto_img(fid: str):
+    return await _serve("fotos", fid)
+
+
+@api_router.delete("/fotos/{fid}")
+async def delete_foto(fid: str):
+    await db.fotos.update_one({"id": fid}, {"$set": {"is_deleted": True}})
+    return {"ok": True}
+
+
+# ---------------- Documentos (flyers guardados) ----------------
+DOC_TIPOS = {"agenda", "orcamento", "recibo"}
+
+
+@api_router.get("/documentos")
+async def list_documentos(cliId: Optional[str] = None):
+    q = {"is_deleted": False}
+    if cliId:
+        q["cliId"] = cliId
+    return await db.documentos.find(q, {"_id": 0, "path": 0}).sort("ts", -1).to_list(2000)
+
+
+@api_router.post("/documentos")
+async def create_documento(file: UploadFile = File(...), tipo: str = Form(...), cliId: str = Form(""), nomeCli: str = Form(""), resumo: str = Form(""), dados: str = Form("{}")):
+    if tipo not in DOC_TIPOS:
+        raise HTTPException(400, "Tipo inválido")
+    try:
+        dados_obj = json.loads(dados)
+    except ValueError:
+        raise HTTPException(400, "Dados inválidos")
+    path, ct = await _store(f"documentos/{tipo}", file)
+    doc = {"id": new_id(), "tipo": tipo, "cliId": cliId, "nomeCli": nomeCli, "resumo": resumo, "dados": dados_obj,
+           "path": path, "content_type": ct, "is_deleted": False, "ts": now_iso()}
+    await db.documentos.insert_one(dict(doc))
+    doc.pop("path")
+    return doc
+
+
+@api_router.get("/documentos/{did}/img")
+async def documento_img(did: str):
+    return await _serve("documentos", did)
+
+
+@api_router.delete("/documentos/{did}")
+async def delete_documento(did: str):
+    await db.documentos.update_one({"id": did}, {"$set": {"is_deleted": True}})
+    return {"ok": True}
+
+
 # ---------------- Config ----------------
 @api_router.get("/config", response_model=Config)
 async def get_config():
@@ -372,6 +466,15 @@ app.add_middleware(
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+@app.on_event("startup")
+async def startup_storage():
+    try:
+        await run_in_threadpool(storage.init_storage)
+        logger.info("Storage initialized")
+    except Exception as e:
+        logger.error(f"Storage init failed: {e}")
 
 
 @app.on_event("shutdown")

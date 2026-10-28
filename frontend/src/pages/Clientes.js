@@ -5,6 +5,8 @@ import {
 } from "lucide-react";
 import { api, waLink, CIDADES } from "@/lib/api";
 import { CidadeChips } from "@/components/CidadeChips";
+import { FotosFogao } from "@/components/FotosFogao";
+import { DocsCliente } from "@/components/DocsCliente";
 import { Modal, Field, inputCls, Btn, Badge, Empty, SectionTitle } from "@/lib/ui";
 import { useApp } from "@/App";
 
@@ -19,6 +21,7 @@ export default function Clientes() {
   const [form, setForm] = useState(blank);
   const [sel, setSel] = useState(null);
   const [ordens, setOrdens] = useState([]);
+  const [pending, setPending] = useState([]);
 
   useEffect(() => { api.listOrdens().then(setOrdens); }, [clientes]);
 
@@ -26,7 +29,7 @@ export default function Clientes() {
     [c.nome, c.tel, c.end, c.etiqueta].join(" ").toLowerCase().includes(q.toLowerCase())
   );
 
-  const openNew = () => { setEdit(null); setForm(blank); setOpen(true); };
+  const openNew = () => { setEdit(null); setForm(blank); setPending([]); setOpen(true); };
   const openEdit = (c) => { setEdit(c); setForm({ ...blank, ...c }); setOpen(true); };
 
   const save = async () => {
@@ -34,7 +37,12 @@ export default function Clientes() {
     const payload = { ...form };
     try {
       if (edit) { await api.updateCliente(edit.id, payload); toast.success("Cliente atualizado"); }
-      else { await api.createCliente(payload); toast.success("Cliente cadastrado"); }
+      else {
+        const novo = await api.createCliente(payload);
+        for (const p of pending) await api.uploadFoto(novo.id, p.blob);
+        setPending([]);
+        toast.success("Cliente cadastrado");
+      }
       setOpen(false); reloadClientes();
       if (sel && edit) setSel({ ...sel, ...payload });
     } catch { toast.error("Erro ao salvar"); }
@@ -56,12 +64,16 @@ export default function Clientes() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="font-outfit font-extrabold text-2xl">{sel.nome}</h2>
-              {sel.etiqueta && <Badge tone="orange">{sel.etiqueta}</Badge>}
+              {sel.etiqueta && <p className="text-xs text-zinc-400 flex items-center gap-1 mt-0.5"><MapPin size={12} className="text-orange-400" /> {sel.etiqueta}</p>}
             </div>
             <div className="flex gap-2">
               <Btn variant="ghost" onClick={() => openEdit(sel)} data-testid="edit-client-btn"><Pencil size={16} /></Btn>
               <Btn variant="danger" onClick={() => remove(sel)} data-testid="delete-client-btn"><Trash2 size={16} /></Btn>
             </div>
+          </div>
+          <div className="mt-4">
+            <p className="text-[10px] font-mono uppercase text-zinc-500 mb-1.5">Fotos do fogão</p>
+            <FotosFogao cliId={sel.id} size={64} testid="ficha-fotos" />
           </div>
           <div className="grid sm:grid-cols-2 gap-3 mt-5 text-sm">
             <Info icon={Phone} label="Telefone" value={sel.tel} />
@@ -91,7 +103,8 @@ export default function Clientes() {
             </div>
           )}
         </div>
-        <ClienteModal {...{ open, setOpen, form, setForm, save, edit }} />
+        <DocsCliente cli={sel} />
+        <ClienteModal {...{ open, setOpen, form, setForm, save, edit, pending, setPending }} />
       </div>
     );
   }
@@ -121,7 +134,7 @@ export default function Clientes() {
           ))}
         </div>
       )}
-      <ClienteModal {...{ open, setOpen, form, setForm, save, edit }} />
+      <ClienteModal {...{ open, setOpen, form, setForm, save, edit, pending, setPending }} />
     </div>
   );
 }
@@ -133,7 +146,7 @@ const Info = ({ icon: Icon, label, value }) => (
   </div>
 );
 
-function ClienteModal({ open, setOpen, form, setForm, save, edit }) {
+function ClienteModal({ open, setOpen, form, setForm, save, edit, pending, setPending }) {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   return (
     <Modal open={open} onClose={() => setOpen(false)} title={edit ? "Editar Cliente" : "Novo Cliente"} testId="client-modal">
@@ -144,6 +157,10 @@ function ClienteModal({ open, setOpen, form, setForm, save, edit }) {
       </div>
       <Field label="Endereço"><input value={form.end} onChange={set("end")} className={inputCls} placeholder="Rua, nº, bairro" /></Field>
       <Field label="Modelo do Fogão"><input value={form.fogao} onChange={set("fogao")} className={inputCls} placeholder="Ex: Brastemp 5 bocas" /></Field>
+      <div className="space-y-1.5">
+        <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">Fotos do fogão</span>
+        <FotosFogao cliId={edit?.id} pending={pending} setPending={setPending} testid="client-fotos" />
+      </div>
       <div className="space-y-1.5">
         <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">Cidade onde reside</span>
         <div className="flex flex-wrap gap-2" data-testid="client-cidade-select">
