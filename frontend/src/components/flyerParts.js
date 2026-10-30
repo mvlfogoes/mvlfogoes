@@ -98,7 +98,8 @@ export const Texto = ({ label, k, f, set, cap, testid, placeholder, maxLines = 6
 const ico = { display: "block", flexShrink: 0 };
 
 export const Header = ({ cfg, titulo, compacto }) => (
-  <div style={{ background: "#1c1a18", color: "#fff", padding: compacto ? "10px 16px 9px" : "14px 16px 12px", textAlign: "center" }}>
+  <div style={{ position: "relative", background: "#1c1a18", color: "#fff", padding: compacto ? "10px 16px 9px" : "14px 16px 12px", textAlign: "center" }}>
+    <img src="/selo.png" alt="Selo Qualidade e Confiança" data-testid="flyer-selo" style={{ position: "absolute", left: 8, top: 7, width: 78, height: "auto", display: "block" }} />
     <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800, fontSize: compacto ? 30 : 36, lineHeight: 1 }}>
       MVL <span style={{ color: "#FF6A00" }}>FOGÕES</span>
     </div>

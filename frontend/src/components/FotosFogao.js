@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Camera, ImagePlus, Trash2, Loader2, Film } from "lucide-react";
+import { Camera, ImagePlus, Trash2, Loader2, Film, Video } from "lucide-react";
 import { api, fotoUrl } from "@/lib/api";
 import { comprimir } from "@/lib/media";
 import { ZoomViewer } from "@/components/ZoomViewer";
@@ -61,7 +61,8 @@ export function FotosFogao({ cliId, pending = [], setPending, size = 56, videos 
           {it.video && <Film size={14} className="absolute top-1 right-1 text-white drop-shadow" />}
         </button>
       ))}
-      <AddBtn icon={Camera} label="Câmera" accept={videos ? "image/*,video/*" : "image/*"} capture="environment" onChange={add} busy={busy} testid={`${testid}-camera`} size={size} />
+      <AddBtn icon={Camera} label="Câmera" accept="image/*" capture="environment" onChange={add} busy={busy} testid={`${testid}-camera`} size={size} />
+      {videos && <AddBtn icon={Video} label="Vídeo" accept="video/*" capture="environment" onChange={add} busy={busy} testid={`${testid}-video`} size={size} />}
       <AddBtn icon={ImagePlus} label="Galeria" accept={accept} multiple onChange={add} busy={busy} testid={`${testid}-add`} size={size} />
       {ver && (
         <ZoomViewer src={ver.url} video={ver.video} onClose={() => setVer(null)} testid="foto-viewer">

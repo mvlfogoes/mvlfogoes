@@ -53,7 +53,7 @@ const Total = ({ valor, label = "Total" }) => (
 );
 
 const Assinatura = ({ cfg }) => (
-  <div style={{ textAlign: "center", marginTop: 14 }}>
+  <div style={{ textAlign: "center", marginTop: 8 }}>
     <div style={{ width: 230, margin: "0 auto", borderTop: "1px solid #1a1a1a", paddingTop: 3, fontSize: 11, fontWeight: 700 }}>Assinatura do técnico</div>
     <div style={{ fontSize: 10, color: "#666" }}>{cfg.tecnico || "MVL Fogões"}</div>
   </div>
@@ -130,7 +130,7 @@ export const MODELOS = {
       <>
         <ClienteRows {...p} />
         <div style={destaque}><Field label="Valor recebido" k="valor" flex={1.3} testid="flyer-input-valor" style={{ fontSize: 17, fontWeight: 800, lineHeight: "24px" }} {...p} f={p.cap && p.f.valor ? { ...p.f, valor: fmtBRL(num(p.f.valor)) } : p.f} /><Field label="Garantia (dias)" k="garantia" testid="flyer-input-garantia" placeholder="ex.: 90" {...p} f={p.cap && p.f.garantia ? { ...p.f, garantia: `${p.f.garantia} dias` } : p.f} /></div>
-        <div><div style={lbl}>Valor por extenso</div><div style={{ ...val, fontSize: 12, fontStyle: "italic", borderBottom: "1px solid #d6d0c7", minHeight: 22 }} data-testid="flyer-extenso">{p.f.extenso ? `(${p.f.extenso})` : "\u00a0"}</div></div>
+        <div><div style={lbl}>Valor por extenso</div><div style={{ ...val, fontSize: 13, fontWeight: 900, textTransform: "uppercase", lineHeight: "17px", whiteSpace: "normal", borderBottom: "1px solid #d6d0c7", minHeight: 22, color: "#111" }} data-testid="flyer-extenso">{p.f.extenso ? `(${p.f.extenso})` : "\u00a0"}</div></div>
         <Field label="Referente a" k="servico" testid="flyer-input-servico" {...p} />
         <Texto label="Peças / observações" k="obs" testid="flyer-input-obs" maxLines={3} {...p} />
         <DataLocal {...p} />
