@@ -153,7 +153,7 @@ function ClienteModal({ open, setOpen, form, setForm, save, edit, pending, setPe
       <Field label="Nome *"><input data-testid="client-nome-input" value={form.nome} onChange={set("nome")} className={inputCls} placeholder="Nome completo" /></Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Telefone"><input data-testid="client-tel-input" value={form.tel} onChange={set("tel")} className={inputCls} placeholder="(11) 90000-0000" /></Field>
-        <Field label="WhatsApp"><input value={form.wa} onChange={set("wa")} className={inputCls} placeholder="(opcional)" /></Field>
+        <Field label="WhatsApp"><input data-testid="client-wa-input" value={form.wa} onChange={set("wa")} className={inputCls} placeholder="(opcional)" /></Field>
       </div>
       <Field label="Endereço"><input value={form.end} onChange={set("end")} className={inputCls} placeholder="Rua, nº, bairro" /></Field>
       <Field label="Modelo do Fogão"><input value={form.fogao} onChange={set("fogao")} className={inputCls} placeholder="Ex: Brastemp 5 bocas" /></Field>

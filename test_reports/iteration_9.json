@@ -1,0 +1,37 @@
+{
+  "summary": "Iteration 9: Tested the 14 new requests (backend and frontend) at mobile 390x844. Backend: 42/42 pytest passed, including the new test_iter9_devedores_garantia.py, which covers devedores CRUD and validation, pagoEm being set and cleared, OS dataConclusao set and cleared with a default garantia of 30, mp4 upload to fotos, and config templates persistence. Frontend: I found and fixed 2 bugs. (1) The Dashboard had a horizontal overflow at 390px (scrollWidth 433, so the Agenda de Hoje and Últimas OS cards were cut off). (2) The flyer Guardar created a DUPLICATE client when the name was new. After the fixes, everything I tested passes: theme, bottom nav with 5 items, mobile-menu with all 9 pages, back button and browser goBack, no overflow on any page, the Financeiro chart and the full devedor flow (add, edit, pago moves it to Pagos and the total updates, delete, wa link), Mídias search, camera and gallery attributes, upload with thumbnail and badge, the client modal tel→wa copy (a custom wa is kept), camera/gallery in the modal and the ficha, quick-message edit, new and delete that survive a reload and feed the wa-send link, Garantias 'entregue 30/10/2026 · até 29/11/2026' plus the rule text, OS 'Garantia (dias)' default 30, Agenda create of a new client (with tel, wa, end and etiqueta) and update of an existing client, the pos-salvar 3 flyers prefilled, the reminder banner on the Agenda and the Dashboard, the reminder flyer, ativar-notif shown when permission is default, flyer-print-btn on the visita and recibo flyers, the 'Telefone / WhatsApp' label, and recibo garantia 30. One issue is left: a long address shrinks to 8px but is still clipped.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Dashboard grid (Agenda de Hoje / Últimas OS)", "issue": "FIXED by testing agent. 'grid md:grid-cols-2' had no mobile column template, so the implicit auto track grew to the content's min width. Page scrollWidth was 433 at 390, and the right edge ('Ver tudo' and the status badges) was cut off. Added grid-cols-1. Now scrollWidth is 390", "selector": "pages/Dashboard.js line 95", "priority": "HIGH"},
+      {"component": "flyerParts Cell (flyer-input-end)", "issue": "An address of 79-80 chars shrinks to the 8px floor (Math.max(8,...)) but still overflows: scrollWidth 333 vs clientWidth 197. The text is clipped on screen ('...de Albuque') and in the PNG, because cap mode uses whiteSpace nowrap plus overflow hidden. The spec check (font < 14px) passes, but the user request 'long addresses must fit' is NOT met. 8px is also hard to read. Suggest wrapping to 2 lines (for example a 2-line clamp with a ~10px floor), or giving Endereço the full row width", "selector": "[data-testid=flyer-input-end]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [
+      {"flow": "Flyer Guardar with a new client name", "issue": "FIXED by testing agent. acao() called sincronizar() without awaiting it, and then guardar called await sincronizar() again. Both calls used the stale clientes list, so 2 clients with the same name were created (reproduced: 2x TEST_FlyerNovo). Now acao passes its sync promise to fn, and guardar awaits it. Retest showed exactly 1 client created, linked to the doc", "affected_selectors": ["[data-testid=flyer-save-btn]"]}
+    ],
+    "design_issues": [
+      {"screen": "Agenda pos-salvar sheet", "issues": ["The 'Agendamento salvo' toast (bottom offset 96) sits on top of the sheet's subtitle text right after saving"]},
+      {"screen": "Ordens / Agenda / Financeiro forms", "issues": ["They still use the browser's native date and time inputs instead of a shadcn calendar (fine on mobile, but inconsistent with the theme)"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter9_devedores_garantia.py", "/app/backend/tests/test_iter8_cascade.py", "/app/backend/tests/test_fotos_documentos.py", "/app/backend/tests/test_mvl_crm.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Make long addresses actually fit in flyer-input-end, on screen and in the PNG: allow 2 lines or use a full-width row instead of an 8px single line that is still clipped",
+    "Review the 2 testing-agent fixes (Dashboard grid-cols-1; FlyerModal acao/guardar sync promise) and keep them"
+  ],
+  "critical_code_review_comments": [
+    "In FlyerModal, editing the name in a flyer opened for an existing client (cli.id is set) RENAMES that client through salvarCliente (matched by id). That may be intended, but a typo in a flyer silently renames the client and cascades nomeCli to their ordens and agendamentos",
+    "In FlyerModal, enviar uses cli?.wa || cli?.tel before f.tel, so a phone edited in the flyer is ignored when the client already has a number",
+    "In FlyerModal, an agendamento without cliId (from the reminder flyer) stays unlinked after sincronizar creates the client; only the doc gets the new cliId",
+    "In Midias, the useEffect fires N GET /clientes/{id}/fotos requests, once per client, on every expand/collapse. With hundreds of clients this is heavy; consider a single backend count endpoint",
+    "Garantias filters status === 'concluida' only, so an OS moved to status 'garantia' (warranty return) disappears from the Garantias page",
+    "MensagensRapidas: deleting every template falls back to TEMPLATES_PADRAO (cfg.templates [] means defaults), so the user can never end up with an empty list. This is OK but may be surprising",
+    "LembreteAmanha: notificar sets localStorage only when permission is granted. The notification only fires when the app is opened; there is no scheduled push (as designed)"
+  ],
+  "updated_files": ["/app/frontend/src/pages/Dashboard.js", "/app/frontend/src/components/FlyerModal.js", "/app/frontend/src/pages/Clientes.js (added data-testid=client-wa-input)", "/app/backend/tests/test_iter9_devedores_garantia.py"],
+  "success_rate": {"backend": "100%", "frontend": "95% (after 2 fixes; the long address still clips)"},
+  "seed_data_creation": "None left. All TEST_ clients (with cascade agendamentos, ordens, fotos, docs) and devedores were deleted, and config templates were restored to []. Pre-existing data (João Silva, Maria Oliveira, 2 OS, 2 agendamentos, tecnico 'Marcos Vinícius ') was untouched",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "The browser and server clock is 2026-10-30. Headless Notification.permission is 'denied'; to test lembrete-ativar-notif, override it via add_init_script with Object.defineProperty(Notification,'permission',{get:()=>'default'}). add_init_script only applies after a reload. Use page.on('dialog') with import asyncio for confirm() deletes. wa-send-{id} is the Btn inside an <a>; read the href from closest('a'). Create the 'tomorrow' agendamento with the browser's date+1 to see lembrete-amanha."
+}

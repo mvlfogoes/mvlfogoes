@@ -81,7 +81,7 @@ function App() {
 
   return (
     <AppCtx.Provider value={{ clientes, reloadClientes, cfg, setCfg, go }}>
-      <Toaster position="bottom-center" offset={96} mobileOffset={{ bottom: 96 }} theme="dark" richColors />
+      <Toaster position="bottom-center" offset={96} mobileOffset={{ bottom: 96 }} theme="light" richColors />
       <InstallPrompt />
       <div className="min-h-screen md:pl-64 pb-24 md:pb-0">
         {/* Desktop sidebar */}

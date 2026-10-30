@@ -15,7 +15,7 @@ const dataExtenso = (d = new Date()) => ({ dia: String(d.getDate()).padStart(2, 
 const ClienteRows = (p) => (
   <>
     <div style={row}><Field label="Cliente" k="nome" flex={1.4} testid="flyer-input-nome" {...p} /><Field label="Telefone / WhatsApp" k="tel" testid="flyer-input-tel" {...p} /></div>
-    <div style={row}><Field label="Endereço" k="end" flex={1.25} testid="flyer-input-end" {...p} /><Field label="Cidade" k="cidade" testid="flyer-input-cidade" {...p} /></div>
+    <div style={row}><Field label="Endereço" k="end" flex={2.3} testid="flyer-input-end" wrap {...p} /><Field label="Cidade" k="cidade" testid="flyer-input-cidade" {...p} /></div>
   </>
 );
 
@@ -129,7 +129,7 @@ export const MODELOS = {
     Body: (p) => (
       <>
         <ClienteRows {...p} />
-        <div style={destaque}><Field label="Valor recebido" k="valor" flex={1.3} testid="flyer-input-valor" style={{ fontSize: 17, fontWeight: 800, lineHeight: "24px" }} {...p} f={p.cap && p.f.valor ? { ...p.f, valor: fmtBRL(num(p.f.valor)) } : p.f} /><Field label="Garantia peças/serviço" k="garantia" testid="flyer-input-garantia" placeholder="ex.: 90" {...p} f={p.cap && p.f.garantia ? { ...p.f, garantia: `${p.f.garantia} dias` } : p.f} /></div>
+        <div style={destaque}><Field label="Valor recebido" k="valor" flex={1.3} testid="flyer-input-valor" style={{ fontSize: 17, fontWeight: 800, lineHeight: "24px" }} {...p} f={p.cap && p.f.valor ? { ...p.f, valor: fmtBRL(num(p.f.valor)) } : p.f} /><Field label="Garantia (dias)" k="garantia" testid="flyer-input-garantia" placeholder="ex.: 90" {...p} f={p.cap && p.f.garantia ? { ...p.f, garantia: `${p.f.garantia} dias` } : p.f} /></div>
         <div><div style={lbl}>Valor por extenso</div><div style={{ ...val, fontSize: 12, fontStyle: "italic", borderBottom: "1px solid #d6d0c7", minHeight: 22 }} data-testid="flyer-extenso">{p.f.extenso ? `(${p.f.extenso})` : "\u00a0"}</div></div>
         <Field label="Referente a" k="servico" testid="flyer-input-servico" {...p} />
         <Texto label="Peças / observações" k="obs" testid="flyer-input-obs" maxLines={3} {...p} />

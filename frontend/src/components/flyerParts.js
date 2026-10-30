@@ -50,27 +50,32 @@ export const extenso = (v) => {
 };
 
 const medidor = typeof document !== "undefined" ? document.createElement("canvas").getContext("2d") : null;
-const caber = (text, width, base, weight) => {
-  if (!text || !width || !medidor) return base;
+const caber = (text, width, base, weight, wrap) => {
+  if (!text || !width || !medidor) return { fontSize: base };
   medidor.font = `${weight} ${base}px Inter, sans-serif`;
   const w = medidor.measureText(String(text)).width;
-  return w <= width ? base : Math.max(8, Math.floor((base * width / w) * 10) / 10);
+  if (w <= width) return { fontSize: base };
+  const uma = (base * width) / w;
+  if (!wrap || uma >= 10.5) return { fontSize: Math.max(8, Math.floor(uma * 10) / 10) };
+  const duas = Math.max(7.5, Math.min(9.5, Math.floor(((base * 2 * width) / w) * 0.95 * 10) / 10));
+  return { fontSize: duas, wrap: true };
 };
 
-export const Cell = ({ value, onChange, cap, style = {}, testid, placeholder = "toque para preencher" }) => {
+export const Cell = ({ value, onChange, cap, style = {}, testid, wrap = false, placeholder = "toque para preencher" }) => {
   const ref = useRef();
   const [w, setW] = useState(0);
   useLayoutEffect(() => { setW(ref.current?.clientWidth || 0); }, []);
-  const fontSize = caber(value, w - 2, style.fontSize || 14, style.fontWeight || 600);
+  const fit = caber(value, w - 2, style.fontSize || 14, style.fontWeight || 600, wrap);
+  const duas = fit.wrap && cap ? { whiteSpace: "normal", lineHeight: `${Math.ceil(fit.fontSize + 1.5)}px`, padding: "0 0 2px", height: 25, wordBreak: "break-word" } : {};
   return cap
-    ? <div ref={ref} style={{ ...val, borderBottom: "1px solid #d6d0c7", whiteSpace: "nowrap", overflow: "hidden", ...style, fontSize }}><span data-txt="1" style={{ position: "relative" }}>{value || "\u00a0"}</span></div>
-    : <input ref={ref} data-testid={testid} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} style={{ ...val, ...style, fontSize }} />;
+    ? <div ref={ref} style={{ ...val, borderBottom: "1px solid #d6d0c7", whiteSpace: "nowrap", overflow: "hidden", ...style, fontSize: fit.fontSize, ...duas }}><span data-txt="1" style={{ position: "relative" }}>{value || "\u00a0"}</span></div>
+    : <input ref={ref} data-testid={testid} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} style={{ ...val, ...style, fontSize: Math.max(fit.fontSize, fit.wrap ? 10 : 0) }} />;
 };
 
-export const Field = ({ label, k, f, set, cap, flex = 1, testid, style, placeholder }) => (
+export const Field = ({ label, k, f, set, cap, flex = 1, testid, style, placeholder, wrap }) => (
   <div style={{ flex, minWidth: 0 }}>
     <div style={lbl}>{label}</div>
-    <Cell value={f[k]} onChange={(v) => set({ ...f, [k]: v })} cap={cap} testid={testid} style={style} placeholder={placeholder} />
+    <Cell value={f[k]} onChange={(v) => set({ ...f, [k]: v })} cap={cap} testid={testid} style={style} placeholder={placeholder} wrap={wrap} />
   </div>
 );
 

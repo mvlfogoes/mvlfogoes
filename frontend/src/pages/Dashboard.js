@@ -92,7 +92,7 @@ export default function Dashboard() {
 
       <LembreteAmanha agenda={agenda} onFlyer={(a) => setFlyer(a)} />
 
-      <div className="grid md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="glass rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-outfit font-bold">Agenda de Hoje</h3>

@@ -71,8 +71,8 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false,
   const acao = (fn, erro) => async () => {
     setBusy(true);
     try {
-      sincronizar();
-      await fn(await gerar());
+      const sync = sincronizar();
+      await fn(await gerar(), sync);
     }
     catch (e) { if (e?.name !== "AbortError") toast.error(erro); }
     setBusy(false);
@@ -83,8 +83,8 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false,
 
   const baixar = acao((blob) => { baixarBlob(blob, nomeArq); toast.success("Imagem salva na galeria!"); }, "Não foi possível gerar a imagem");
   const enviar = acao((blob) => compartilhar(blob, nomeArq, cli?.wa || cli?.tel || f.tel), "Não foi possível enviar");
-  const guardar = acao(async (blob) => {
-    await sincronizar();
+  const guardar = acao(async (blob, sync) => {
+    await sync;
     await api.saveDoc({ blob, tipo: modelo, cliId: cliRef.current?.id || cli?.id || ag?.cliId, nomeCli: f.nome, resumo: M.resumo(f), dados: f });
     toast.success("Guardado no arquivo do cliente");
   }, "Não foi possível guardar");
