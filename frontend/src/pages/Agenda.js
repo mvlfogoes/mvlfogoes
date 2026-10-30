@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Plus, ChevronLeft, ChevronRight, CheckCircle2, XCircle, Trash2, Pencil,
-  Bell, CalendarDays, List, MapPin,
+  Bell, CalendarDays, List, MapPin, X, Calculator, Receipt,
 } from "lucide-react";
-import { api, fmtData, hoje, waLink } from "@/lib/api";
+import { api, fmtData, hoje, waLink, CIDADES } from "@/lib/api";
+import { salvarCliente } from "@/lib/clienteSync";
+import { LembreteAmanha } from "@/components/LembreteAmanha";
 import { Modal, Field, inputCls, Btn, Badge, Empty, SectionTitle } from "@/lib/ui";
 import { useApp } from "@/App";
 import FlyerModal from "@/components/FlyerModal";
@@ -19,10 +21,28 @@ const TIPOS = [
 ];
 const MES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const DIA = ["D", "S", "T", "Q", "Q", "S", "S"];
-const blank = { cliId: "", nomeCli: "", servico: "", tipo: "fogao", data: hoje(), hora: "", status: "agendado", valor: "", obs: "" };
+const blank = { cliId: "", nomeCli: "", tel: "", wa: "", end: "", cidade: "", servico: "", tipo: "fogao", data: hoje(), hora: "", status: "agendado", valor: "", obs: "" };
+
+const PosSalvar = ({ pos, onClose, onFlyer }) => (
+  <div className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center" onClick={onClose} data-testid="agenda-pos-salvar">
+    <div className="glass w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
+      <div className="flex items-start justify-between">
+        <div><p className="font-outfit font-bold text-lg">Agendamento salvo</p><p className="text-xs text-zinc-400">{pos.ag.nomeCli} · dados guardados no cadastro do cliente</p></div>
+        <button onClick={onClose} data-testid="agenda-pos-close" className="p-1 text-zinc-400"><X size={20} /></button>
+      </div>
+      <p className="text-sm text-zinc-300">Abrir flyer para enviar ou imprimir:</p>
+      <div className="grid grid-cols-3 gap-2">
+        {[["agenda", "Visita", Bell], ["orcamento", "Orçamento", Calculator], ["recibo", "Recibo", Receipt]].map(([m, l, I]) => (
+          <Btn key={m} variant="outline" onClick={() => onFlyer(m)} data-testid={`agenda-pos-${m}`} className="flex-col !py-3"><I size={18} /> {l}</Btn>
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
 export default function Agenda() {
-  const { clientes, cfg } = useApp();
+  const { clientes, cfg, reloadClientes } = useApp();
+  const [pos, setPos] = useState(null);
   const [eventos, setEventos] = useState([]);
   const [view, setView] = useState("mes");
   const [cur, setCur] = useState(new Date());
@@ -35,17 +55,28 @@ export default function Agenda() {
   const reload = () => api.listAgenda().then(setEventos);
   useEffect(() => { reload(); }, []);
 
+  const comCliente = (a) => {
+    const c = clientes.find((x) => x.id === a.cliId);
+    return { tel: c?.tel || "", wa: c?.wa || "", end: c?.end || "", cidade: c?.etiqueta || "" };
+  };
   const openNew = (d) => { setEdit(null); setForm({ ...blank, data: d || hoje() }); setOpen(true); };
-  const openEdit = (a) => { setEdit(a); setForm({ ...blank, ...a, tipo: a.tipo || "fogao", valor: String(a.valor ?? "") }); setOpen(true); };
+  const openEdit = (a) => { setEdit(a); setForm({ ...blank, ...a, ...comCliente(a), tipo: a.tipo || "fogao", valor: String(a.valor ?? "") }); setOpen(true); };
+  const escolherCli = (id) => {
+    const c = clientes.find((x) => x.id === id);
+    setForm((f) => ({ ...f, cliId: id, nomeCli: c?.nome || "", tel: c?.tel || "", wa: c?.wa || "", end: c?.end || "", cidade: c?.etiqueta || "" }));
+  };
+  const setF = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value, ...(k === "tel" && (!f.wa || f.wa === f.tel) ? { wa: e.target.value } : {}) }));
 
   const save = async () => {
-    if (!form.servico.trim() && !form.cliId) return toast.error("Informe cliente ou serviço");
-    const cli = clientes.find((c) => c.id === form.cliId);
-    const payload = { ...form, nomeCli: cli?.nome || form.nomeCli, valor: parseFloat(form.valor) || 0 };
+    if (!form.servico.trim() && !form.nomeCli.trim()) return toast.error("Informe cliente ou serviço");
     try {
-      if (edit) await api.updateAgenda(edit.id, payload);
-      else await api.createAgenda(payload);
+      const cli = await salvarCliente({ cliId: form.cliId, nome: form.nomeCli, tel: form.tel, wa: form.wa, end: form.end, cidade: form.cidade }, clientes);
+      if (cli) reloadClientes();
+      const { tel, wa, end, cidade, ...resto } = form; // eslint-disable-line no-unused-vars
+      const payload = { ...resto, cliId: cli?.id || "", nomeCli: cli?.nome || form.nomeCli, valor: parseFloat(form.valor) || 0 };
+      const ag = edit ? await api.updateAgenda(edit.id, payload) : await api.createAgenda(payload);
       toast.success("Agendamento salvo"); setOpen(false); reload();
+      setPos({ ag, cli });
     } catch { toast.error("Erro ao salvar"); }
   };
 
@@ -64,6 +95,7 @@ export default function Agenda() {
   return (
     <div className="space-y-5">
       <SectionTitle right={<Btn onClick={() => openNew(selDay)} data-testid="agenda-add-btn"><Plus size={16} /> Novo</Btn>}>Agenda</SectionTitle>
+      <LembreteAmanha agenda={eventos} onFlyer={abrirFlyer} />
 
       <div className="flex gap-2">
         {[{ id: "mes", icon: CalendarDays, l: "Mês" }, { id: "lista", icon: List, l: "Lista" }].map((v) => (
@@ -94,9 +126,9 @@ export default function Agenda() {
                 const isSel = ds === selDay, isHoje = ds === hojeStr;
                 return (
                   <button key={dnum} data-testid={`agenda-day-${dnum}`} onClick={() => setSelDay(ds)}
-                    className={`aspect-square rounded-lg text-sm flex flex-col items-center justify-center relative transition ${isSel ? "fire-btn text-white" : isHoje ? "bg-orange-500/15 text-orange-400" : "hover:bg-white/5 text-zinc-300"}`}>
+                    className={`aspect-square rounded-lg text-sm flex flex-col items-center justify-center relative transition ${isSel ? "fire-btn text-white" : isHoje ? "bg-sky-400/15 text-sky-300" : "hover:bg-white/5 text-zinc-300"}`}>
                     {dnum}
-                    {has && <span className={`w-1 h-1 rounded-full mt-0.5 ${isSel ? "bg-white" : "bg-orange-500"}`} />}
+                    {has && <span className={`w-1 h-1 rounded-full mt-0.5 ${isSel ? "bg-white" : "bg-sky-400"}`} />}
                   </button>
                 );
               })}
@@ -115,10 +147,22 @@ export default function Agenda() {
       )}
 
       <Modal open={open} onClose={() => setOpen(false)} title={edit ? "Editar Agendamento" : "Novo Agendamento"} testId="agenda-modal">
-        <Field label="Cliente">
-          <select data-testid="agenda-cliente-select" value={form.cliId} onChange={(e) => setForm((f) => ({ ...f, cliId: e.target.value }))} className={inputCls}>
-            <option value="">Selecione...</option>
+        <Field label="Cliente cadastrado">
+          <select data-testid="agenda-cliente-select" value={form.cliId} onChange={(e) => escolherCli(e.target.value)} className={inputCls}>
+            <option value="">Novo cliente (preencha abaixo)</option>
             {clientes.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+          </select>
+        </Field>
+        <Field label="Nome do cliente"><input data-testid="agenda-nome-input" value={form.nomeCli} onChange={setF("nomeCli")} className={inputCls} /></Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Telefone"><input data-testid="agenda-tel-input" type="tel" value={form.tel} onChange={setF("tel")} className={inputCls} /></Field>
+          <Field label="WhatsApp"><input data-testid="agenda-wa-input" type="tel" value={form.wa} onChange={setF("wa")} className={inputCls} /></Field>
+        </div>
+        <Field label="Endereço"><input data-testid="agenda-end-input" value={form.end} onChange={setF("end")} className={inputCls} /></Field>
+        <Field label="Cidade">
+          <select data-testid="agenda-cidade-select" value={form.cidade} onChange={setF("cidade")} className={inputCls}>
+            <option value="">—</option>
+            {CIDADES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </Field>
         <Field label="Serviço / Descrição"><input data-testid="agenda-servico-input" value={form.servico} onChange={(e) => setForm((f) => ({ ...f, servico: e.target.value }))} className={inputCls} /></Field>
@@ -136,7 +180,8 @@ export default function Agenda() {
         <Btn onClick={save} className="w-full" data-testid="agenda-save-btn">Salvar</Btn>
       </Modal>
 
-      {flyer && <FlyerModal open onClose={() => setFlyer(null)} ag={flyer.ag} cli={flyer.cli} cfg={cfg} />}
+      {flyer && <FlyerModal open modelo={flyer.modelo} onClose={() => setFlyer(null)} ag={flyer.ag} cli={flyer.cli} cfg={cfg} />}
+      {pos && <PosSalvar pos={pos} onClose={() => setPos(null)} onFlyer={(modelo) => { setFlyer({ ag: pos.ag, cli: pos.cli, modelo }); setPos(null); }} />}
     </div>
   );
 }

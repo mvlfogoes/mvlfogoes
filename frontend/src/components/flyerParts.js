@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import { Phone, Flame, Search, Wrench, ShieldCheck, Star, Handshake, Check } from "lucide-react";
 
 export const W = 405;
@@ -48,9 +49,23 @@ export const extenso = (v) => {
   return parts.join(" e ");
 };
 
-export const Cell = ({ value, onChange, cap, style, testid, placeholder = "toque para preencher" }) =>
-  cap ? <div style={{ ...val, borderBottom: "1px solid #d6d0c7", whiteSpace: "nowrap", overflow: "hidden", ...style }}><span data-txt="1" style={{ position: "relative" }}>{value || "\u00a0"}</span></div>
-    : <input data-testid={testid} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} style={{ ...val, ...style }} />;
+const medidor = typeof document !== "undefined" ? document.createElement("canvas").getContext("2d") : null;
+const caber = (text, width, base, weight) => {
+  if (!text || !width || !medidor) return base;
+  medidor.font = `${weight} ${base}px Inter, sans-serif`;
+  const w = medidor.measureText(String(text)).width;
+  return w <= width ? base : Math.max(8, Math.floor((base * width / w) * 10) / 10);
+};
+
+export const Cell = ({ value, onChange, cap, style = {}, testid, placeholder = "toque para preencher" }) => {
+  const ref = useRef();
+  const [w, setW] = useState(0);
+  useLayoutEffect(() => { setW(ref.current?.clientWidth || 0); }, []);
+  const fontSize = caber(value, w - 2, style.fontSize || 14, style.fontWeight || 600);
+  return cap
+    ? <div ref={ref} style={{ ...val, borderBottom: "1px solid #d6d0c7", whiteSpace: "nowrap", overflow: "hidden", ...style, fontSize }}><span data-txt="1" style={{ position: "relative" }}>{value || "\u00a0"}</span></div>
+    : <input ref={ref} data-testid={testid} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} style={{ ...val, ...style, fontSize }} />;
+};
 
 export const Field = ({ label, k, f, set, cap, flex = 1, testid, style, placeholder }) => (
   <div style={{ flex, minWidth: 0 }}>

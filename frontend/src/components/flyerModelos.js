@@ -14,7 +14,7 @@ const dataExtenso = (d = new Date()) => ({ dia: String(d.getDate()).padStart(2, 
 
 const ClienteRows = (p) => (
   <>
-    <div style={row}><Field label="Cliente" k="nome" flex={1.4} testid="flyer-input-nome" {...p} /><Field label="Telefone" k="tel" testid="flyer-input-tel" {...p} /></div>
+    <div style={row}><Field label="Cliente" k="nome" flex={1.4} testid="flyer-input-nome" {...p} /><Field label="Telefone / WhatsApp" k="tel" testid="flyer-input-tel" {...p} /></div>
     <div style={row}><Field label="Endereço" k="end" flex={1.25} testid="flyer-input-end" {...p} /><Field label="Cidade" k="cidade" testid="flyer-input-cidade" {...p} /></div>
   </>
 );
@@ -122,14 +122,14 @@ export const MODELOS = {
     campos: [["nome", "Cliente"], ["tel", "Telefone"], ["end", "Endereço"], ["cidade", "Cidade"], ["valor", "Valor"], ["servico", "Referente a"], ["garantia", "Garantia"], ["obs", "Obs"]],
     init: (s, cli, cfg) => ({
       ...base(s, cli, cfg), valor: s.valor ? fmtBRL(s.valor) : "", extenso: extenso(s.valor || 0),
-      servico: s.servico || "", garantia: "", obs: s.pecas ? `Peças: ${s.pecas}` : "", ...dataExtenso(),
+      servico: s.servico || "", garantia: String(s.garantia || 30), obs: s.pecas ? `Peças: ${s.pecas}` : "", ...dataExtenso(),
     }),
     fix: (n, old) => (n.valor !== old.valor ? { ...n, extenso: extenso(num(n.valor)) } : n),
     resumo: (f) => (f.valor ? fmtBRL(num(f.valor)) : "Recibo"),
     Body: (p) => (
       <>
         <ClienteRows {...p} />
-        <div style={destaque}><Field label="Valor recebido" k="valor" flex={1.3} testid="flyer-input-valor" style={{ fontSize: 17, fontWeight: 800, lineHeight: "24px" }} {...p} f={p.cap && p.f.valor ? { ...p.f, valor: fmtBRL(num(p.f.valor)) } : p.f} /><Field label="Garantia (dias)" k="garantia" testid="flyer-input-garantia" placeholder="ex.: 90" {...p} f={p.cap && p.f.garantia ? { ...p.f, garantia: `${p.f.garantia} dias` } : p.f} /></div>
+        <div style={destaque}><Field label="Valor recebido" k="valor" flex={1.3} testid="flyer-input-valor" style={{ fontSize: 17, fontWeight: 800, lineHeight: "24px" }} {...p} f={p.cap && p.f.valor ? { ...p.f, valor: fmtBRL(num(p.f.valor)) } : p.f} /><Field label="Garantia peças/serviço" k="garantia" testid="flyer-input-garantia" placeholder="ex.: 90" {...p} f={p.cap && p.f.garantia ? { ...p.f, garantia: `${p.f.garantia} dias` } : p.f} /></div>
         <div><div style={lbl}>Valor por extenso</div><div style={{ ...val, fontSize: 12, fontStyle: "italic", borderBottom: "1px solid #d6d0c7", minHeight: 22 }} data-testid="flyer-extenso">{p.f.extenso ? `(${p.f.extenso})` : "\u00a0"}</div></div>
         <Field label="Referente a" k="servico" testid="flyer-input-servico" {...p} />
         <Texto label="Peças / observações" k="obs" testid="flyer-input-obs" maxLines={3} {...p} />

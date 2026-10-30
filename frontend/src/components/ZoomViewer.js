@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const centro = (p) => ({ x: p.reduce((s, q) => s + q.x, 0) / p.length, y: p.reduce((s, q) => s + q.y, 0) / p.length });
 
-export function ZoomViewer({ src, onClose, children, testid = "zoom-viewer" }) {
+export function ZoomViewer({ src, video = false, onClose, children, testid = "zoom-viewer" }) {
   const [t, setT] = useState({ s: 1, x: 0, y: 0 });
   const tRef = useRef(t);
   const pts = useRef(new Map());
@@ -35,6 +35,9 @@ export function ZoomViewer({ src, onClose, children, testid = "zoom-viewer" }) {
       <div className="absolute top-0 inset-x-0 z-10 flex justify-end p-3 bg-gradient-to-b from-black/70 to-transparent">
         <button onClick={onClose} data-testid={`${testid}-close`} className="p-2 rounded-full bg-white/10 text-white"><X size={22} /></button>
       </div>
+      {video ? (
+        <div className="flex-1 flex items-center justify-center"><video src={src} controls autoPlay playsInline data-testid={`${testid}-video`} className="max-w-full max-h-full" /></div>
+      ) : (
       <div className="flex-1 overflow-hidden flex items-center justify-center select-none" style={{ touchAction: "none" }}
         onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onWheel={wheel}
         onDoubleClick={() => setT((o) => (o.s > 1 ? { s: 1, x: 0, y: 0 } : { s: 2.5, x: 0, y: 0 }))}>
@@ -42,6 +45,7 @@ export function ZoomViewer({ src, onClose, children, testid = "zoom-viewer" }) {
           className="max-w-full max-h-full object-contain"
           style={{ transform: `translate(${t.x}px, ${t.y}px) scale(${t.s})`, transition: pts.current.size ? "none" : "transform 0.15s ease-out" }} />
       </div>
+      )}
       {children && <div className="p-3 flex gap-2 bg-black/80 border-t border-white/10">{children}</div>}
     </div>,
     document.body

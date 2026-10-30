@@ -8,6 +8,8 @@ import { baixarBlob, compartilhar, imprimir } from "@/lib/media";
 import { ConversaPanel } from "@/components/ConversaPanel";
 import { W, H, Header, Solucoes, Footer } from "@/components/flyerParts";
 import { MODELOS } from "@/components/flyerModelos";
+import { salvarCliente } from "@/lib/clienteSync";
+import { useApp } from "@/App";
 
 const Flyer = ({ M, f, set, cfg, cap, innerRef }) => (
   <div ref={innerRef} data-testid="flyer-canvas" style={{ width: W, height: H, background: "#fff", fontFamily: "Inter, sans-serif", color: "#1a1a1a", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -35,6 +37,8 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false,
   const M = MODELOS[modelo];
   const conf = cfg || {};
   const ref = useRef();
+  const cliRef = useRef(cli);
+  const { clientes, reloadClientes } = useApp();
   const [busy, setBusy] = useState(false);
   const [cap, setCap] = useState(false);
   const [painel, setPainel] = useState(colar);
@@ -66,28 +70,35 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false,
 
   const acao = (fn, erro) => async () => {
     setBusy(true);
-    try { await fn(await gerar()); }
+    try {
+      sincronizar();
+      await fn(await gerar());
+    }
     catch (e) { if (e?.name !== "AbortError") toast.error(erro); }
     setBusy(false);
   };
+  const sincronizar = () => salvarCliente({ cliId: cli?.id || ag?.cliId, nome: f.nome, tel: f.tel, end: f.end, cidade: f.cidade }, clientes)
+    .then((c) => { if (c) { cliRef.current = c; reloadClientes(); } })
+    .catch(() => {});
 
   const baixar = acao((blob) => { baixarBlob(blob, nomeArq); toast.success("Imagem salva na galeria!"); }, "Não foi possível gerar a imagem");
   const enviar = acao((blob) => compartilhar(blob, nomeArq, cli?.wa || cli?.tel || f.tel), "Não foi possível enviar");
   const guardar = acao(async (blob) => {
-    await api.saveDoc({ blob, tipo: modelo, cliId: cli?.id || ag?.cliId, nomeCli: f.nome, resumo: M.resumo(f), dados: f });
+    await sincronizar();
+    await api.saveDoc({ blob, tipo: modelo, cliId: cliRef.current?.id || cli?.id || ag?.cliId, nomeCli: f.nome, resumo: M.resumo(f), dados: f });
     toast.success("Guardado no arquivo do cliente");
   }, "Não foi possível guardar");
   const imprimirFlyer = acao((blob) => { imprimir(blob).catch(() => toast.error("Não foi possível imprimir")); }, "Não foi possível imprimir");
 
   return createPortal(
     <div className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-sm flex flex-col" data-testid="flyer-modal">
-      <div className="glass border-b border-orange-500/20 px-4 py-3 flex items-center justify-between gap-2">
+      <div className="glass border-b border-sky-400/20 px-4 py-3 flex items-center justify-between gap-2">
         <div className="min-w-0">
           <h3 className="font-outfit font-bold" data-testid="flyer-modal-title">{M.modal}</h3>
           <p className="text-xs text-zinc-400 flex items-center gap-1"><Pencil size={11} /> Toque nos campos para editar antes de enviar</p>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={() => setPainel(!painel)} data-testid="flyer-toggle-conversa" title="Dados da conversa" className={`p-2 rounded-xl ${painel ? "text-orange-400 bg-orange-500/10" : "text-zinc-400 hover:bg-white/5"}`}><ClipboardPaste size={19} /></button>
+          <button onClick={() => setPainel(!painel)} data-testid="flyer-toggle-conversa" title="Dados da conversa" className={`p-2 rounded-xl ${painel ? "text-sky-300 bg-sky-400/10" : "text-zinc-400 hover:bg-white/5"}`}><ClipboardPaste size={19} /></button>
           <button onClick={onClose} data-testid="flyer-close-btn" className="p-2 rounded-xl hover:bg-white/5 text-zinc-400"><X size={20} /></button>
         </div>
       </div>
@@ -99,11 +110,11 @@ export default function FlyerModal({ open, onClose, ag, cli, cfg, colar = false,
           </div>
         </div>
       </div>
-      <div className="glass border-t border-orange-500/20 p-3 flex gap-2">
+      <div className="glass border-t border-sky-400/20 p-3 flex gap-2">
         <button onClick={enviar} disabled={busy} data-testid="flyer-send-btn" className="fire-btn text-white flex-1 rounded-xl py-3 font-semibold flex items-center justify-center gap-2 disabled:opacity-50"><Send size={17} /> {busy ? "Gerando..." : "Enviar"}</button>
-        <button onClick={guardar} disabled={busy} data-testid="flyer-save-btn" className="border border-orange-500/40 text-orange-400 rounded-xl px-3 py-3 font-semibold flex items-center gap-1.5 disabled:opacity-50"><Archive size={17} /> Guardar</button>
-        {M.imprimir && <button onClick={imprimirFlyer} disabled={busy} data-testid="flyer-print-btn" aria-label="Imprimir" className="border border-orange-500/40 text-orange-400 rounded-xl px-3 py-3 font-semibold flex items-center gap-2 disabled:opacity-50"><Printer size={17} /></button>}
-        <button onClick={baixar} disabled={busy} data-testid="flyer-download-btn" aria-label="Baixar imagem" className="border border-orange-500/40 text-orange-400 rounded-xl px-3 py-3 font-semibold flex items-center gap-2 disabled:opacity-50"><Download size={17} /></button>
+        <button onClick={guardar} disabled={busy} data-testid="flyer-save-btn" className="border border-sky-400/40 text-sky-300 rounded-xl px-3 py-3 font-semibold flex items-center gap-1.5 disabled:opacity-50"><Archive size={17} /> Guardar</button>
+        {<button onClick={imprimirFlyer} disabled={busy} data-testid="flyer-print-btn" aria-label="Imprimir" className="border border-sky-400/40 text-sky-300 rounded-xl px-3 py-3 font-semibold flex items-center gap-2 disabled:opacity-50"><Printer size={17} /></button>}
+        <button onClick={baixar} disabled={busy} data-testid="flyer-download-btn" aria-label="Baixar imagem" className="border border-sky-400/40 text-sky-300 rounded-xl px-3 py-3 font-semibold flex items-center gap-2 disabled:opacity-50"><Download size={17} /></button>
       </div>
     </div>,
     document.body

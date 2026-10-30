@@ -18,7 +18,7 @@ const FILTERS = [
 
 const blank = {
   cliId: "", nomeCli: "", servico: "", problema: "", pecas: "", valor: "",
-  garantia: 3, data: hoje(), hora: "", status: "pendente", obs: "",
+  garantia: 30, data: hoje(), hora: "", status: "pendente", obs: "",
 };
 
 export default function Ordens() {
@@ -45,7 +45,7 @@ export default function Ordens() {
     if (!form.cliId) return toast.error("Selecione o cliente");
     if (!form.servico.trim()) return toast.error("Informe o serviço");
     const cli = clientes.find((c) => c.id === form.cliId);
-    const payload = { ...form, nomeCli: cli?.nome || "", valor: parseFloat(form.valor) || 0, garantia: parseInt(form.garantia) || 0 };
+    const payload = { ...form, nomeCli: cli?.nome || "", valor: parseFloat(form.valor) || 0, garantia: parseInt(form.garantia) || 30 };
     try {
       if (edit) { const r = await api.updateOrdem(edit.id, payload); toast.success("OS atualizada"); if (sel) setSel(r); }
       else { await api.createOrdem(payload); toast.success("OS criada"); }
@@ -69,7 +69,7 @@ export default function Ordens() {
       `OS: #${o.num}\nCliente: ${o.nomeCli}\nServiço: ${o.servico}\n` +
       (o.problema ? `Defeito: ${o.problema}\n` : "") +
       (o.pecas ? `Peças: ${o.pecas}\n` : "") +
-      `Valor: ${fmtBRL(o.valor)}\nGarantia: ${o.garantia} meses\nData: ${fmtData(o.data)}\n\n` +
+      `Valor: ${fmtBRL(o.valor)}\nGarantia: ${o.garantia} dias em peças e serviços (a partir da entrega)\nData: ${fmtData(o.dataConclusao || o.data)}\n\n` +
       `Técnico: ${cfg.tecnico}`;
     window.open(waLink(cli?.wa || cli?.tel, msg), "_blank");
   };
@@ -77,7 +77,7 @@ export default function Ordens() {
   if (sel) {
     return (
       <div className="space-y-5">
-        <button data-testid="back-os-btn" onClick={() => setSel(null)} className="flex items-center gap-1 text-orange-400 text-sm font-semibold">
+        <button data-testid="back-os-btn" onClick={() => setSel(null)} className="flex items-center gap-1 text-sky-300 text-sm font-semibold">
           <ChevronLeft size={18} /> Voltar
         </button>
         <div className="glass rounded-2xl p-6">
@@ -93,7 +93,8 @@ export default function Ordens() {
             <Row label="Defeito" value={sel.problema} />
             <Row label="Peças" value={sel.pecas} />
             <Row label="Valor" value={fmtBRL(sel.valor)} />
-            <Row label="Garantia" value={`${sel.garantia} meses`} />
+            <Row label="Garantia" value={`${sel.garantia} dias (peças e serviços)`} />
+            <Row label="Entregue em" value={sel.dataConclusao ? fmtData(sel.dataConclusao) : "Ainda não concluída"} />
             <Row label="Data" value={fmtData(sel.data)} />
             <Row label="Hora" value={sel.hora || "—"} />
           </div>
@@ -166,7 +167,7 @@ function OSModal({ open, setOpen, form, setForm, save, edit, clientes }) {
       <Field label="Peças trocadas"><input value={form.pecas} onChange={set("pecas")} className={inputCls} /></Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Valor (R$)"><input data-testid="os-valor-input" type="number" value={form.valor} onChange={set("valor")} className={inputCls} placeholder="0,00" /></Field>
-        <Field label="Garantia (meses)"><input type="number" value={form.garantia} onChange={set("garantia")} className={inputCls} /></Field>
+        <Field label="Garantia (dias)"><input type="number" data-testid="os-garantia-input" value={form.garantia} onChange={set("garantia")} className={inputCls} /></Field>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Data"><input type="date" value={form.data} onChange={set("data")} className={inputCls} /></Field>

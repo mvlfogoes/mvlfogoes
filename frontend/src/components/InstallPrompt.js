@@ -41,7 +41,7 @@ export default function InstallPrompt() {
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
-          className="fixed z-[120] left-3 right-3 bottom-24 md:bottom-6 md:left-auto md:right-6 md:w-80 glass rounded-2xl p-4 border-orange-500/40 shadow-[0_0_30px_rgba(255,85,0,0.25)]"
+          className="fixed z-[120] left-3 right-3 bottom-24 md:bottom-6 md:left-auto md:right-6 md:w-80 glass rounded-2xl p-4 border-sky-400/40 shadow-[0_0_30px_rgba(56,189,248,0.25)]"
         >
           <button onClick={dismiss} data-testid="install-dismiss-btn" className="absolute top-2 right-2 p-1.5 text-zinc-500 hover:text-zinc-200">
             <X size={16} />

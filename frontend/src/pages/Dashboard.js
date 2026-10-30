@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ClipboardList, Users, Images, CalendarCheck, Plus, UserPlus,
-  CalendarPlus, Flame, ArrowRight, CircleDollarSign,
+  CalendarPlus, ArrowRight, Wallet,
 } from "lucide-react";
-import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip, CartesianGrid } from "recharts";
-import { api, fmtBRL, fmtData } from "@/lib/api";
+import { api, fmtData, hoje } from "@/lib/api";
+import { LembreteAmanha } from "@/components/LembreteAmanha";
+import FlyerModal from "@/components/FlyerModal";
 import { Badge, SectionTitle } from "@/lib/ui";
 import { useApp } from "@/App";
 
@@ -13,7 +14,8 @@ const statusTone = { pendente: "amber", concluida: "green", garantia: "blue" };
 const statusLabel = { pendente: "Pendente", concluida: "Concluída", garantia: "Garantia" };
 
 export default function Dashboard() {
-  const { go, cfg } = useApp();
+  const { go, cfg, clientes } = useApp();
+  const [flyer, setFlyer] = useState(null);
   const [stats, setStats] = useState(null);
   const [ordens, setOrdens] = useState([]);
   const [agenda, setAgenda] = useState([]);
@@ -24,7 +26,7 @@ export default function Dashboard() {
     api.listAgenda().then(setAgenda);
   }, []);
 
-  const hojeStr = new Date().toISOString().slice(0, 10);
+  const hojeStr = hoje();
   const agendaHoje = agenda.filter((a) => a.data === hojeStr && a.status === "agendado");
 
   const metrics = [
@@ -38,16 +40,14 @@ export default function Dashboard() {
     { k: "Nova OS", icon: Plus, go: "os" },
     { k: "Cliente", icon: UserPlus, go: "clientes" },
     { k: "Agendar", icon: CalendarPlus, go: "agenda" },
-    { k: "Garantias", icon: Flame, go: "garantias" },
+    { k: "Financeiro", icon: Wallet, go: "financeiro" },
   ];
 
-  // chart: faturamento por mês (últimos 6 meses) das OS concluídas
-  const chart = buildChart(ordens);
 
   return (
     <div className="space-y-7">
       <div className="anim-up">
-        <p className="text-xs font-mono uppercase tracking-widest text-orange-400/80">{saud()}</p>
+        <p className="text-xs font-mono uppercase tracking-widest text-sky-300/80">{saud()}</p>
         <h1 className="font-outfit font-extrabold text-3xl sm:text-4xl mt-1">
           Olá, <span className="fire-text">{cfg.tecnico?.split(" ")[0] || "Técnico"}</span>
         </h1>
@@ -65,7 +65,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
             className="glass glass-hover rounded-2xl p-4 text-left relative overflow-hidden group"
           >
-            <m.icon className="absolute -right-2 -bottom-2 text-orange-500/10 group-hover:text-orange-500/20 transition" size={64} />
+            <m.icon className="absolute -right-2 -bottom-2 text-sky-400/10 group-hover:text-sky-400/20 transition" size={64} />
             <div className="flame-badge p-2 rounded-xl w-fit mb-3"><m.icon size={18} /></div>
             <div className="font-outfit font-extrabold text-3xl">{m.v}</div>
             <div className="text-xs text-zinc-400 mt-0.5">{m.k}</div>
@@ -90,37 +90,13 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="glass rounded-2xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-outfit font-bold flex items-center gap-2"><CircleDollarSign size={18} className="text-orange-400" /> Faturamento (OS)</h3>
-          <Badge tone="orange">6 meses</Badge>
-        </div>
-        <div style={{ width: "100%", height: 180 }}>
-          <ResponsiveContainer>
-            <AreaChart data={chart}>
-              <defs>
-                <linearGradient id="fire" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#FF8800" stopOpacity={0.6} />
-                  <stop offset="100%" stopColor="#FF5500" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey="mes" stroke="#71717A" fontSize={11} tickLine={false} axisLine={false} />
-              <Tooltip
-                contentStyle={{ background: "#12141D", border: "1px solid rgba(255,85,0,0.3)", borderRadius: 12, fontSize: 12 }}
-                formatter={(v) => [fmtBRL(v), "Total"]}
-              />
-              <Area type="monotone" dataKey="total" stroke="#FF6A00" strokeWidth={2.5} fill="url(#fire)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      <LembreteAmanha agenda={agenda} onFlyer={(a) => setFlyer(a)} />
 
       <div className="grid md:grid-cols-2 gap-5">
         <div className="glass rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-outfit font-bold">Agenda de Hoje</h3>
-            <button data-testid="see-agenda-btn" onClick={() => go("agenda")} className="text-orange-400 text-xs flex items-center gap-1">
+            <button data-testid="see-agenda-btn" onClick={() => go("agenda")} className="text-sky-300 text-xs flex items-center gap-1">
               Ver tudo <ArrowRight size={14} />
             </button>
           </div>
@@ -130,7 +106,7 @@ export default function Dashboard() {
             <div className="space-y-2">
               {agendaHoje.map((a) => (
                 <div key={a.id} className="flex items-center gap-3 bg-white/5 rounded-xl p-3">
-                  <div className="font-mono text-orange-400 text-sm">{a.hora || "--:--"}</div>
+                  <div className="font-mono text-sky-300 text-sm">{a.hora || "--:--"}</div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm truncate">{a.nomeCli || "Cliente"}</p>
                     <p className="text-xs text-zinc-500 truncate">{a.servico}</p>
@@ -144,7 +120,7 @@ export default function Dashboard() {
         <div className="glass rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-outfit font-bold">Últimas OS</h3>
-            <button data-testid="see-os-btn" onClick={() => go("os")} className="text-orange-400 text-xs flex items-center gap-1">
+            <button data-testid="see-os-btn" onClick={() => go("os")} className="text-sky-300 text-xs flex items-center gap-1">
               Ver tudo <ArrowRight size={14} />
             </button>
           </div>
@@ -166,6 +142,7 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      {flyer && <FlyerModal open onClose={() => setFlyer(null)} ag={flyer} cli={clientes.find((c) => c.id === flyer.cliId)} cfg={cfg} />}
     </div>
   );
 }
@@ -177,17 +154,3 @@ function saud() {
   return "Boa noite";
 }
 
-function buildChart(ordens) {
-  const map = {};
-  const now = new Date();
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = d.toISOString().slice(0, 7);
-    map[key] = { mes: d.toLocaleDateString("pt-BR", { month: "short" }), total: 0 };
-  }
-  ordens.forEach((o) => {
-    const key = (o.data || "").slice(0, 7);
-    if (map[key] && o.status === "concluida") map[key].total += Number(o.valor) || 0;
-  });
-  return Object.values(map);
-}

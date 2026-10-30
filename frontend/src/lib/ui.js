@@ -15,7 +15,7 @@ export const Modal = ({ open, onClose, title, children, testId }) => (
           transition={{ type: "spring", damping: 26, stiffness: 280 }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 border-b border-orange-500/15 bg-[#12141D]/90 backdrop-blur-xl">
+          <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 border-b border-sky-400/15 bg-[#0B1424]/90 backdrop-blur-xl">
             <h3 className="font-outfit font-bold text-lg">{title}</h3>
             <button onClick={onClose} data-testid="modal-close-btn" className="p-2 rounded-xl hover:bg-white/5 text-zinc-400">
               <X size={20} />
@@ -36,7 +36,7 @@ export const Field = ({ label, children }) => (
 );
 
 export const inputCls =
-  "w-full rounded-xl bg-[#0A0B10]/80 border border-orange-500/20 px-3.5 py-2.5 text-sm text-zinc-100 outline-none focus:border-orange-500/70 focus:ring-2 focus:ring-orange-500/20 transition placeholder:text-zinc-600";
+  "w-full rounded-xl bg-[#050A14]/80 border border-sky-400/20 px-3.5 py-2.5 text-sm text-zinc-100 outline-none focus:border-sky-400/70 focus:ring-2 focus:ring-sky-400/20 transition placeholder:text-zinc-600";
 
 export const Btn = ({ children, variant = "fire", className = "", ...p }) => {
   const base =
@@ -45,7 +45,7 @@ export const Btn = ({ children, variant = "fire", className = "", ...p }) => {
     fire: "fire-btn text-white hover:brightness-110",
     ghost: "bg-white/5 text-zinc-200 hover:bg-white/10 border border-white/10",
     danger: "bg-red-500/15 text-red-400 border border-red-500/30 hover:bg-red-500/25",
-    outline: "border border-orange-500/40 text-orange-400 hover:bg-orange-500/10",
+    outline: "border border-sky-400/40 text-sky-300 hover:bg-sky-400/10",
   };
   return (
     <button className={`${base} ${styles[variant]} ${className}`} {...p}>

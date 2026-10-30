@@ -53,7 +53,7 @@ export default function Config() {
       <SectionTitle>Configurações</SectionTitle>
 
       <div className="glass rounded-2xl p-5">
-        <h3 className="font-outfit font-bold flex items-center gap-2 mb-4"><User size={18} className="text-orange-400" /> Dados da Empresa</h3>
+        <h3 className="font-outfit font-bold flex items-center gap-2 mb-4"><User size={18} className="text-sky-300" /> Dados da Empresa</h3>
         <div className="space-y-3">
           <Field label="Nome do técnico"><input data-testid="config-tecnico-input" value={tecnico} onChange={(e) => setTecnico(e.target.value)} className={inputCls} /></Field>
           <div className="grid grid-cols-2 gap-3">
@@ -63,12 +63,12 @@ export default function Config() {
           <Field label="Slogan"><input data-testid="config-slogan-input" value={slogan} onChange={(e) => setSlogan(e.target.value)} className={inputCls} placeholder="A qualidade que dá confiança!" /></Field>
         </div>
         <Btn onClick={saveTecnico} className="mt-3" data-testid="config-save-btn"><Save size={16} /> Salvar</Btn>
-        <p className="text-xs text-zinc-500 mt-3">Esses dados aparecem no <span className="text-orange-400">flyer de agendamento</span> enviado no WhatsApp.</p>
+        <p className="text-xs text-zinc-500 mt-3">Esses dados aparecem no <span className="text-sky-300">flyer de agendamento</span> enviado no WhatsApp.</p>
       </div>
 
       <div className="glass rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-outfit font-bold flex items-center gap-2"><BarChart3 size={18} className="text-orange-400" /> Relatório Mensal</h3>
+          <h3 className="font-outfit font-bold flex items-center gap-2"><BarChart3 size={18} className="text-sky-300" /> Relatório Mensal</h3>
           <input type="month" value={mes} onChange={(e) => setMes(e.target.value)} className={`${inputCls} !w-auto !py-1.5`} data-testid="config-mes-input" />
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -104,7 +104,7 @@ export default function Config() {
 
 const Metric = ({ icon: Icon, label, value, small }) => (
   <div className="bg-white/5 rounded-xl p-3">
-    <Icon size={16} className="text-orange-400 mb-1" />
+    <Icon size={16} className="text-sky-300 mb-1" />
     <p className={`font-outfit font-extrabold ${small ? "text-base" : "text-2xl"}`}>{value}</p>
     <p className="text-[10px] font-mono uppercase text-zinc-500">{label}</p>
   </div>

@@ -45,7 +45,7 @@ export function DocsCliente({ cli }) {
               <button key={d.id} onClick={() => setVer(d)} data-testid={`doc-${d.id}`} className="glass glass-hover rounded-xl overflow-hidden text-left">
                 <div className="aspect-[9/16] bg-white"><img src={docUrl(d.id)} alt={label} loading="lazy" className="w-full h-full object-cover object-top" /></div>
                 <div className="p-2">
-                  <p className="text-[11px] font-semibold flex items-center gap-1 text-orange-300"><Icon size={11} /> {label}</p>
+                  <p className="text-[11px] font-semibold flex items-center gap-1 text-sky-300"><Icon size={11} /> {label}</p>
                   {d.resumo && <p className="text-[10px] text-zinc-500 truncate">{d.resumo}</p>}
                   <p className="text-[10px] text-zinc-600">{quando(d.ts)}</p>
                 </div>
@@ -57,8 +57,8 @@ export function DocsCliente({ cli }) {
       {ver && (
         <ZoomViewer src={docUrl(ver.id)} onClose={() => setVer(null)} testid="doc-viewer">
           <button onClick={() => enviar(ver)} data-testid="doc-viewer-send" className="fire-btn text-white flex-1 rounded-xl py-3 font-semibold flex items-center justify-center gap-2"><Send size={17} /> Enviar</button>
-          <button onClick={() => baixar(ver)} data-testid="doc-viewer-download" className="border border-orange-500/40 text-orange-400 rounded-xl px-4 py-3"><Download size={17} /></button>
-          {ver.tipo !== "agenda" && <button onClick={async () => { try { await imprimir(await blobDe(ver)); } catch { toast.error("Não foi possível imprimir"); } }} data-testid="doc-viewer-print" aria-label="Imprimir" className="border border-orange-500/40 text-orange-400 rounded-xl px-4 py-3"><Printer size={17} /></button>}
+          <button onClick={() => baixar(ver)} data-testid="doc-viewer-download" className="border border-sky-400/40 text-sky-300 rounded-xl px-4 py-3"><Download size={17} /></button>
+          {<button onClick={async () => { try { await imprimir(await blobDe(ver)); } catch { toast.error("Não foi possível imprimir"); } }} data-testid="doc-viewer-print" aria-label="Imprimir" className="border border-sky-400/40 text-sky-300 rounded-xl px-4 py-3"><Printer size={17} /></button>}
           <button onClick={() => excluir(ver)} data-testid="doc-viewer-delete" className="border border-red-500/40 text-red-400 rounded-xl px-4 py-3"><Trash2 size={17} /></button>
         </ZoomViewer>
       )}

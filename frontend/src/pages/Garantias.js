@@ -12,15 +12,15 @@ export default function Garantias() {
   const garantias = useMemo(() => {
     const now = new Date();
     return ordens
-      .filter((o) => (o.garantia || 0) > 0 && o.data)
+      .filter((o) => o.status === "concluida" && (o.dataConclusao || o.data))
       .map((o) => {
-        const ini = new Date(o.data + "T00:00:00");
-        const fim = new Date(ini); fim.setMonth(fim.getMonth() + (o.garantia || 0));
+        const ini = new Date((o.dataConclusao || o.data) + "T00:00:00");
+        const fim = new Date(ini); fim.setDate(fim.getDate() + (o.garantia || 30));
         const dias = Math.ceil((fim - now) / 86400000);
         let st = "ativa";
         if (dias < 0) st = "expirada";
-        else if (dias <= 7) st = "vencendo";
-        return { ...o, fim, dias, st };
+        else if (dias <= 5) st = "vencendo";
+        return { ...o, ini, fim, dias, st };
       })
       .filter((g) => [g.nomeCli, g.servico].join(" ").toLowerCase().includes(q.toLowerCase()))
       .sort((a, b) => a.dias - b.dias);
@@ -35,11 +35,12 @@ export default function Garantias() {
   return (
     <div className="space-y-5">
       <SectionTitle>Garantias</SectionTitle>
+      <p className="text-xs text-zinc-400 -mt-2" data-testid="gar-regra">Garantia de 30 dias em peças e serviços, contada a partir da entrega (OS concluída).</p>
       <div className="relative">
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
         <input data-testid="gar-search-input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por cliente ou OS..." className={`${inputCls} pl-10`} />
       </div>
-      {garantias.length === 0 ? <Empty icon={ShieldCheck} title="Sem garantias" sub="OS com garantia definida aparecem aqui." /> : (
+      {garantias.length === 0 ? <Empty icon={ShieldCheck} title="Sem garantias" sub="As OS concluídas aparecem aqui com a garantia contando da entrega." /> : (
         <div className="space-y-2">
           {garantias.map((g) => {
             const S = stMap[g.st];
@@ -48,7 +49,7 @@ export default function Garantias() {
                 <div className="flame-badge p-2.5 rounded-xl"><S.icon size={18} /></div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">#{g.num} · {g.nomeCli}</p>
-                  <p className="text-xs text-zinc-500 truncate">{g.servico} · até {fmtData(g.fim.toISOString().slice(0, 10))}</p>
+                  <p className="text-xs text-zinc-500 truncate">{g.servico} · entregue {fmtData(g.ini.toLocaleDateString("sv-SE"))} · até {fmtData(g.fim.toLocaleDateString("sv-SE"))}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <Badge tone={S.tone}>{S.label}</Badge>

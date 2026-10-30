@@ -70,14 +70,14 @@ export function ConversaPanel({ f, set, cli, campos = CAMPOS }) {
         <a href={waLink(cli?.wa || cli?.tel, "")} target="_blank" rel="noreferrer" data-testid="conversa-open-wa" className="text-xs text-emerald-400 flex items-center gap-1"><MessageCircle size={13} /> Abrir conversa</a>
       </div>
       <p className="text-[11px] text-zinc-400">No WhatsApp, copie a mensagem do cliente e cole aqui. Depois selecione um trecho e toque no campo onde ele vai.</p>
-      <textarea ref={ref} data-testid="conversa-text" value={txt} onChange={(e) => setTxt(e.target.value)} rows={4} placeholder="Cole aqui a conversa..." className="w-full rounded-xl bg-black/40 border border-white/10 p-2 text-sm text-zinc-100 outline-none focus:border-orange-500/60" />
+      <textarea ref={ref} data-testid="conversa-text" value={txt} onChange={(e) => setTxt(e.target.value)} rows={4} placeholder="Cole aqui a conversa..." className="w-full rounded-xl bg-black/40 border border-white/10 p-2 text-sm text-zinc-100 outline-none focus:border-sky-400/60" />
       <div className="flex gap-2">
         <button onClick={colar} data-testid="conversa-paste-btn" className="flex-1 rounded-xl bg-white/5 py-2 text-xs font-semibold flex items-center justify-center gap-1"><ClipboardPaste size={14} /> Colar</button>
         <button onClick={auto} data-testid="conversa-auto-btn" className="flex-1 rounded-xl fire-btn text-white py-2 text-xs font-semibold flex items-center justify-center gap-1"><Wand2 size={14} /> Preencher automático</button>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {campos.map(([k, l]) => (
-          <button key={k} onMouseDown={(e) => e.preventDefault()} onClick={() => usarSelecao(k)} data-testid={`conversa-campo-${k}`} className="px-2.5 py-1 rounded-full border border-orange-500/40 text-orange-300 text-[11px] font-semibold">→ {l}</button>
+          <button key={k} onMouseDown={(e) => e.preventDefault()} onClick={() => usarSelecao(k)} data-testid={`conversa-campo-${k}`} className="px-2.5 py-1 rounded-full border border-sky-400/40 text-sky-300 text-[11px] font-semibold">→ {l}</button>
         ))}
       </div>
     </div>

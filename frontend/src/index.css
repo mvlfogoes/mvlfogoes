@@ -54,25 +54,25 @@
 
 @layer base {
   :root {
-    --background: 230 23% 5%;
-    --foreground: 240 6% 96%;
-    --card: 228 25% 11%;
-    --card-foreground: 240 6% 96%;
-    --popover: 228 28% 9%;
-    --popover-foreground: 240 6% 96%;
-    --primary: 20 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 228 20% 16%;
-    --secondary-foreground: 240 6% 96%;
-    --muted: 228 16% 18%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 32 100% 50%;
+    --background: 222 47% 5%;
+    --foreground: 210 40% 97%;
+    --card: 220 40% 10%;
+    --card-foreground: 210 40% 97%;
+    --popover: 222 45% 8%;
+    --popover-foreground: 210 40% 97%;
+    --primary: 199 92% 60%;
+    --primary-foreground: 222 47% 6%;
+    --secondary: 220 30% 15%;
+    --secondary-foreground: 210 40% 97%;
+    --muted: 220 25% 17%;
+    --muted-foreground: 215 20% 68%;
+    --accent: 4 86% 55%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 20 100% 50% / 0.15;
-    --input: 228 20% 20%;
-    --ring: 20 100% 50%;
+    --border: 199 92% 60% / 0.16;
+    --input: 220 30% 18%;
+    --ring: 199 92% 60%;
     --radius: 0.9rem;
   }
 }
@@ -81,10 +81,13 @@
   html { color-scheme: dark; }
   body {
     @apply bg-background text-foreground;
-    background-color: #0A0B10;
+    background-color: #050A14;
     background-image:
-      radial-gradient(circle at 50% -10%, rgba(255,85,0,0.18) 0%, rgba(10,11,16,0) 55%),
-      radial-gradient(circle at 90% 10%, rgba(255,136,0,0.08) 0%, rgba(10,11,16,0) 40%);
+      radial-gradient(circle at 50% -10%, rgba(56,189,248,0.20) 0%, rgba(5,10,20,0) 55%),
+      radial-gradient(circle at 95% 15%, rgba(239,68,68,0.10) 0%, rgba(5,10,20,0) 40%),
+      linear-gradient(rgba(56,189,248,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.035) 1px, transparent 1px);
+    background-size: auto, auto, 32px 32px, 32px 32px;
     background-attachment: fixed;
     min-height: 100vh;
   }
@@ -95,15 +98,16 @@
 .font-cond { font-family: var(--font-cond); }
 .font-mono { font-family: var(--font-mono); }
 
-.glass { background: rgba(20,24,35,0.72); backdrop-filter: blur(18px); border: 1px solid rgba(255,120,0,0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.45); }
+.glass { background: rgba(10,18,34,0.74); backdrop-filter: blur(18px); border: 1px solid rgba(56,189,248,0.16); box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
 .glass-hover { transition: border-color .3s, box-shadow .3s, transform .3s; }
-.glass-hover:hover { border-color: rgba(255,85,0,0.55); box-shadow: 0 0 22px rgba(255,85,0,0.22); }
-.fire-btn { background: linear-gradient(135deg,#FF3300 0%,#FF8800 100%); box-shadow: 0 6px 20px rgba(255,85,0,0.35); }
-.fire-text { background: linear-gradient(135deg,#FF5500,#FFCC00); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.glass-hover:hover { border-color: rgba(56,189,248,0.55); box-shadow: 0 0 22px rgba(56,189,248,0.22); }
+.fire-btn { background: linear-gradient(135deg,#D9141F 0%,#FF4D1F 100%); box-shadow: 0 6px 20px rgba(239,40,30,0.35), inset 0 1px 0 rgba(255,255,255,0.15); }
+.fire-text { background: linear-gradient(135deg,#7DD3FC 0%,#38BDF8 45%,#FF4D1F 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .anim-up { animation: floatUp .5s ease both; }
-.flame-badge { background: linear-gradient(135deg,rgba(255,85,0,0.2),rgba(255,136,0,0.08)); border: 1px solid rgba(255,85,0,0.3); color: #FF8A3C; }
-.beam-border { background: linear-gradient(90deg,rgba(255,85,0,0.8),rgba(255,204,0,0.8),rgba(255,85,0,0.8)); background-size: 200% 100%; animation: beam 3s linear infinite; }
+.flame-badge { background: linear-gradient(135deg,rgba(56,189,248,0.18),rgba(56,189,248,0.05)); border: 1px solid rgba(56,189,248,0.35); color: #7DD3FC; }
+.neon-ring { box-shadow: 0 0 0 1px rgba(56,189,248,0.35), 0 0 26px rgba(56,189,248,0.18); }
+.beam-border { background: linear-gradient(90deg,rgba(56,189,248,0.8),rgba(239,68,68,0.8),rgba(56,189,248,0.8)); background-size: 200% 100%; animation: beam 3s linear infinite; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,85,0,0.3); border-radius: 8px; }
-::selection { background: rgba(255,85,0,0.35); color: #fff; }
+::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius: 8px; }
+::selection { background: rgba(56,189,248,0.35); color: #fff; }

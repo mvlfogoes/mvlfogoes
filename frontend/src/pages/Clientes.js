@@ -57,14 +57,14 @@ export default function Clientes() {
     const osDoCli = ordens.filter((o) => o.cliId === sel.id);
     return (
       <div className="space-y-5">
-        <button data-testid="back-clientes-btn" onClick={() => setSel(null)} className="flex items-center gap-1 text-orange-400 text-sm font-semibold">
+        <button data-testid="back-clientes-btn" onClick={() => setSel(null)} className="flex items-center gap-1 text-sky-300 text-sm font-semibold">
           <ChevronLeft size={18} /> Voltar
         </button>
         <div className="glass rounded-2xl p-6">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="font-outfit font-extrabold text-2xl">{sel.nome}</h2>
-              {sel.etiqueta && <p className="text-xs text-zinc-400 flex items-center gap-1 mt-0.5"><MapPin size={12} className="text-orange-400" /> {sel.etiqueta}</p>}
+              {sel.etiqueta && <p className="text-xs text-zinc-400 flex items-center gap-1 mt-0.5"><MapPin size={12} className="text-sky-300" /> {sel.etiqueta}</p>}
             </div>
             <div className="flex gap-2">
               <Btn variant="ghost" onClick={() => openEdit(sel)} data-testid="edit-client-btn"><Pencil size={16} /></Btn>
@@ -141,13 +141,13 @@ export default function Clientes() {
 
 const Info = ({ icon: Icon, label, value }) => (
   <div className="flex items-start gap-2 bg-white/5 rounded-xl p-3">
-    <Icon size={16} className="text-orange-400 mt-0.5" />
+    <Icon size={16} className="text-sky-300 mt-0.5" />
     <div><p className="text-[10px] font-mono uppercase text-zinc-500">{label}</p><p className="text-zinc-200">{value || "—"}</p></div>
   </div>
 );
 
 function ClienteModal({ open, setOpen, form, setForm, save, edit, pending, setPending }) {
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value, ...(k === "tel" && (!f.wa || f.wa === f.tel) ? { wa: e.target.value } : {}) }));
   return (
     <Modal open={open} onClose={() => setOpen(false)} title={edit ? "Editar Cliente" : "Novo Cliente"} testId="client-modal">
       <Field label="Nome *"><input data-testid="client-nome-input" value={form.nome} onChange={set("nome")} className={inputCls} placeholder="Nome completo" /></Field>
@@ -170,7 +170,7 @@ function ClienteModal({ open, setOpen, form, setForm, save, edit, pending, setPe
               <button key={c} type="button" onClick={() => setForm((f) => ({ ...f, etiqueta: on ? "" : c }))}
                 data-testid={`client-cidade-opt-${c.toLowerCase().replace(/\s+/g, "-")}`}
                 className={`px-3 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-colors ${on ? "fire-btn text-white" : "bg-white/5 text-zinc-300 border border-white/10"}`}>
-                {on ? <CheckCircle2 size={15} /> : <MapPin size={15} className="text-orange-400" />} {c}
+                {on ? <CheckCircle2 size={15} /> : <MapPin size={15} className="text-sky-300" />} {c}
               </button>
             );
           })}

@@ -1,18 +1,11 @@
 import { useEffect, useState } from "react";
-import { Search, Send, MessageCircle, Sparkles, X, ImageIcon, ClipboardPaste, MapPin, Calculator, Receipt } from "lucide-react";
+import { Search, Send, MessageCircle, X, ImageIcon, ClipboardPaste, MapPin, Calculator, Receipt } from "lucide-react";
 import { api, waLink, hoje } from "@/lib/api";
 import { inputCls, Empty, SectionTitle, Btn, Badge } from "@/lib/ui";
 import { useApp } from "@/App";
 import { CidadeChips } from "@/components/CidadeChips";
 import FlyerModal from "@/components/FlyerModal";
-
-const TEMPLATES = [
-  { id: "orcamento", label: "Orçamento Pronto", msg: (n) => `Olá ${n}! Seu orçamento da MVL Fogões está pronto. Posso te enviar os detalhes?` },
-  { id: "caminho", label: "Técnico a Caminho", msg: (n) => `Olá ${n}, aqui é da MVL Fogões. Nosso técnico já está a caminho! 🔧🔥` },
-  { id: "concluido", label: "Serviço Concluído", msg: (n) => `Olá ${n}! Seu serviço foi concluído com sucesso. Qualquer dúvida estamos à disposição. Obrigado pela confiança! 🔥` },
-  { id: "satisfacao", label: "Pesquisa de Satisfação", msg: (n) => `Olá ${n}! Como foi sua experiência com a MVL Fogões? Sua opinião é muito importante para nós! ⭐` },
-  { id: "agenda", label: "Confirmar Visita", msg: (n) => `Olá ${n}! Confirmando sua visita técnica da MVL Fogões. Podemos manter o horário combinado?` },
-];
+import { MensagensRapidas, TEMPLATES_PADRAO, preencher } from "@/components/MensagensRapidas";
 
 const proxAg = (agenda, c) =>
   agenda.filter((a) => a.cliId === c.id && a.status === "agendado" && a.data >= hoje()).sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora))[0]
@@ -27,7 +20,7 @@ const ClienteSheet = ({ c, ag, onClose, onFlyer }) => (
         <div>
           <p className="font-outfit font-bold text-lg">{c.nome}</p>
           <p className="text-xs text-zinc-400">{c.wa || c.tel || "sem número"}{c.etiqueta ? ` · ${c.etiqueta}` : ""}</p>
-          {ag.data && <p className="text-xs text-orange-400 mt-1">Próxima visita: {ag.data.split("-").reverse().join("/")} {ag.hora}</p>}
+          {ag.data && <p className="text-xs text-sky-300 mt-1">Próxima visita: {ag.data.split("-").reverse().join("/")} {ag.hora}</p>}
         </div>
         <button onClick={onClose} data-testid="wa-sheet-close" className="p-1 text-zinc-400"><X size={20} /></button>
       </div>
@@ -45,10 +38,13 @@ const ClienteSheet = ({ c, ag, onClose, onFlyer }) => (
 );
 
 export default function WhatsAppCentral() {
-  const { clientes, cfg } = useApp();
+  const { clientes, cfg, setCfg } = useApp();
   const [q, setQ] = useState("");
   const [cidade, setCidade] = useState("");
-  const [tpl, setTpl] = useState(TEMPLATES[0]);
+  const tpls = cfg.templates?.length ? cfg.templates : TEMPLATES_PADRAO;
+  const [tplId, setTplId] = useState(null);
+  const tpl = tpls.find((t) => t.id === tplId) || tpls[0];
+  const setTpl = (t) => setTplId(t?.id || null);
   const [agenda, setAgenda] = useState([]);
   const [ordens, setOrdens] = useState([]);
   const [sel, setSel] = useState(null);
@@ -62,18 +58,7 @@ export default function WhatsAppCentral() {
     <div className="space-y-5">
       <SectionTitle>Central WhatsApp</SectionTitle>
 
-      <div className="glass rounded-2xl p-5">
-        <h3 className="font-outfit font-bold flex items-center gap-2 mb-3"><Sparkles size={18} className="text-orange-400" /> Mensagem Rápida</h3>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {TEMPLATES.map((t) => (
-            <button key={t.id} data-testid={`wa-template-${t.id}`} onClick={() => setTpl(t)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${tpl.id === t.id ? "fire-btn text-white" : "bg-white/5 text-zinc-400"}`}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <p className="text-sm text-zinc-400 bg-white/5 rounded-xl p-3 italic">"{tpl.msg("[Cliente]")}"</p>
-      </div>
+      <MensagensRapidas cfg={cfg} setCfg={setCfg} tpls={tpls} tpl={tpl} setTpl={setTpl} />
 
       <div className="relative">
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -91,7 +76,7 @@ export default function WhatsAppCentral() {
                 <p className="text-xs text-zinc-500 truncate">{c.wa || c.tel || "sem número"}</p>
                 {c.etiqueta && <span className="inline-flex mt-1"><Badge tone="orange"><MapPin size={10} className="inline mr-0.5" />{c.etiqueta}</Badge></span>}
               </div>
-              <a href={waLink(c.wa || c.tel, tpl.msg(c.nome))} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+              <a href={waLink(c.wa || c.tel, preencher(tpl, c.nome))} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
                 <Btn variant="fire" className="!px-3 !py-2" data-testid={`wa-send-${c.id}`}><Send size={15} /> Enviar</Btn>
               </a>
             </div>

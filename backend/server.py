@@ -31,6 +31,10 @@ def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 
+def hoje_br() -> str:
+    return datetime.now(timezone(timedelta(hours=-3))).strftime("%Y-%m-%d")
+
+
 def new_id():
     return str(uuid.uuid4())
 
@@ -70,11 +74,12 @@ class Ordem(BaseModel):
     problema: str = ""
     pecas: str = ""
     valor: float = 0.0
-    garantia: int = 0  # meses
+    garantia: int = 30  # dias, conta a partir de dataConclusao
     data: str = ""
     hora: str = ""
     status: str = "pendente"  # pendente | concluida | garantia
     obs: str = ""
+    dataConclusao: str = ""
     criadoEm: str = Field(default_factory=now_iso)
 
 
@@ -85,7 +90,7 @@ class OrdemCreate(BaseModel):
     problema: str = ""
     pecas: str = ""
     valor: float = 0.0
-    garantia: int = 0
+    garantia: int = 30
     data: str = ""
     hora: str = ""
     status: str = "pendente"
@@ -144,6 +149,7 @@ class Config(BaseModel):
     telefone: str = "(32) 98885-6030"
     cidade: str = "Bicas - MG"
     slogan: str = "A qualidade que dá confiança!"
+    templates: List[dict] = []
 
 
 class ConfigUpdate(BaseModel):
@@ -151,6 +157,32 @@ class ConfigUpdate(BaseModel):
     telefone: Optional[str] = None
     cidade: Optional[str] = None
     slogan: Optional[str] = None
+    templates: Optional[List[dict]] = None
+
+
+class Devedor(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=new_id)
+    cliId: str = ""
+    nome: str
+    tel: str = ""
+    valor: float = 0.0
+    vencimento: str = ""
+    obs: str = ""
+    pago: bool = False
+    pagoEm: str = ""
+    criadoEm: str = Field(default_factory=now_iso)
+
+
+class DevedorCreate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+    cliId: str = ""
+    nome: str = Field(min_length=1)
+    tel: str = ""
+    valor: float = Field(default=0.0, ge=0)
+    vencimento: str = ""
+    obs: str = ""
+    pago: bool = False
 
 
 # ---------------- Clientes ----------------
@@ -201,7 +233,7 @@ async def list_ordens():
 async def create_ordem(payload: OrdemCreate):
     last = await db.ordens.find_one({}, {"_id": 0, "num": 1}, sort=[("num", -1)])
     num = (last["num"] + 1) if last and last.get("num") else 1001
-    obj = Ordem(**payload.model_dump(), num=num)
+    obj = Ordem(**payload.model_dump(), num=num, dataConclusao=hoje_br() if payload.status == "concluida" else "")
     await db.ordens.insert_one(obj.model_dump())
     return obj
 
@@ -211,8 +243,13 @@ async def update_ordem(oid: str, payload: OrdemCreate):
     doc = await db.ordens.find_one({"id": oid}, {"_id": 0})
     if not doc:
         raise HTTPException(404, "OS não encontrada")
-    await db.ordens.update_one({"id": oid}, {"$set": payload.model_dump()})
-    doc.update(payload.model_dump())
+    upd = payload.model_dump()
+    if upd["status"] == "concluida" and not doc.get("dataConclusao"):
+        upd["dataConclusao"] = hoje_br()
+    elif upd["status"] == "pendente":
+        upd["dataConclusao"] = ""
+    await db.ordens.update_one({"id": oid}, {"$set": upd})
+    doc.update(upd)
     return Ordem(**doc)
 
 
@@ -274,18 +311,21 @@ async def delete_midia(mid: str):
 
 
 # ---------------- Fotos do fogão ----------------
+VIDEO_TYPES = {"video/mp4": "mp4", "video/quicktime": "mov", "video/webm": "webm", "video/3gpp": "3gp"}
 IMG_TYPES = {"image/jpeg": "jpg", "image/jpg": "jpg", "image/png": "png", "image/webp": "webp", "image/heic": "heic", "image/heif": "heif"}
 MAX_BYTES = 12 * 1024 * 1024
+MAX_VIDEO = 40 * 1024 * 1024
 
 
-async def _store(folder: str, file: UploadFile):
+async def _store(folder: str, file: UploadFile, videos: bool = False):
     ct = file.content_type or ""
-    if ct not in IMG_TYPES:
-        raise HTTPException(400, "Envie uma imagem (jpg, png ou webp)")
+    tipos = {**IMG_TYPES, **(VIDEO_TYPES if videos else {})}
+    if ct not in tipos:
+        raise HTTPException(400, "Envie uma foto ou vídeo" if videos else "Envie uma imagem (jpg, png ou webp)")
     data = await file.read()
-    if len(data) > MAX_BYTES:
-        raise HTTPException(400, "Imagem muito grande")
-    path = f"{storage.APP_NAME}/{folder}/{new_id()}.{IMG_TYPES[ct]}"
+    if len(data) > (MAX_VIDEO if ct in VIDEO_TYPES else MAX_BYTES):
+        raise HTTPException(400, "Arquivo muito grande")
+    path = f"{storage.APP_NAME}/{folder}/{new_id()}.{tipos[ct]}"
     res = await run_in_threadpool(storage.put_object, path, data, ct)
     return res["path"], ct
 
@@ -305,7 +345,7 @@ async def list_fotos(cid: str):
 
 @api_router.post("/clientes/{cid}/fotos")
 async def upload_foto(cid: str, file: UploadFile = File(...)):
-    path, ct = await _store(f"fotos/{cid}", file)
+    path, ct = await _store(f"fotos/{cid}", file, videos=True)
     doc = {"id": new_id(), "cliId": cid, "path": path, "content_type": ct, "is_deleted": False, "ts": now_iso()}
     await db.fotos.insert_one(dict(doc))
     doc.pop("path")
@@ -362,6 +402,37 @@ async def delete_documento(did: str):
     return {"ok": True}
 
 
+# ---------------- Devedores ----------------
+@api_router.get("/devedores", response_model=List[Devedor])
+async def list_devedores():
+    return await db.devedores.find({}, {"_id": 0}).sort([("pago", 1), ("vencimento", 1)]).to_list(5000)
+
+
+@api_router.post("/devedores", response_model=Devedor)
+async def create_devedor(payload: DevedorCreate):
+    obj = Devedor(**payload.model_dump(), pagoEm=hoje_br() if payload.pago else "")
+    await db.devedores.insert_one(obj.model_dump())
+    return obj
+
+
+@api_router.put("/devedores/{did}", response_model=Devedor)
+async def update_devedor(did: str, payload: DevedorCreate):
+    doc = await db.devedores.find_one({"id": did}, {"_id": 0})
+    if not doc:
+        raise HTTPException(404, "Registro não encontrado")
+    upd = payload.model_dump()
+    upd["pagoEm"] = (doc.get("pagoEm") or hoje_br()) if upd["pago"] else ""
+    await db.devedores.update_one({"id": did}, {"$set": upd})
+    doc.update(upd)
+    return Devedor(**doc)
+
+
+@api_router.delete("/devedores/{did}")
+async def delete_devedor(did: str):
+    await db.devedores.delete_one({"id": did})
+    return {"ok": True}
+
+
 # ---------------- Config ----------------
 @api_router.get("/config", response_model=Config)
 async def get_config():
@@ -386,7 +457,7 @@ async def update_config(payload: ConfigUpdate):
 @api_router.get("/stats")
 async def get_stats():
     clientes = await db.clientes.count_documents({})
-    midias = await db.midias.count_documents({})
+    midias = await db.fotos.count_documents({"is_deleted": False})
     os_total = await db.ordens.count_documents({})
     os_abertas = await db.ordens.count_documents({"status": "pendente"})
     os_concluidas = await db.ordens.count_documents({"status": "concluida"})
@@ -429,6 +500,9 @@ async def backup():
         "ordens": await db.ordens.find({}, {"_id": 0}).to_list(10000),
         "agendamentos": await db.agendamentos.find({}, {"_id": 0}).to_list(10000),
         "midias": await db.midias.find({}, {"_id": 0}).to_list(10000),
+        "devedores": await db.devedores.find({}, {"_id": 0}).to_list(10000),
+        "fotos": await db.fotos.find({}, {"_id": 0}).to_list(10000),
+        "documentos": await db.documentos.find({}, {"_id": 0}).to_list(10000),
         "config": await db.config.find_one({"id": "config"}, {"_id": 0}),
         "exportadoEm": now_iso(),
     }
@@ -436,7 +510,7 @@ async def backup():
 
 @api_router.post("/restore")
 async def restore(data: dict):
-    for col in ["clientes", "ordens", "agendamentos", "midias"]:
+    for col in ["clientes", "ordens", "agendamentos", "midias", "devedores", "fotos", "documentos"]:
         items = data.get(col)
         if isinstance(items, list) and items:
             await db[col].delete_many({})
@@ -468,6 +542,13 @@ app.add_middleware(
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+@app.on_event("startup")
+async def migrar_garantia_dias():
+    if not await db.config.find_one({"id": "migr_garantia_dias"}):
+        await db.ordens.update_many({}, {"$set": {"garantia": 30}})
+        await db.config.insert_one({"id": "migr_garantia_dias", "ts": now_iso()})
 
 
 @app.on_event("startup")

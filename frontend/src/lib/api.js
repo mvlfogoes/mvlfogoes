@@ -44,6 +44,11 @@ export const api = {
     return http.post("/documentos", fd).then((r) => r.data);
   },
   deleteDoc: (id) => http.delete(`/documentos/${id}`).then((r) => r.data),
+  // devedores
+  listDevedores: () => http.get("/devedores").then((r) => r.data),
+  createDevedor: (d) => http.post("/devedores", d).then((r) => r.data),
+  updateDevedor: (id, d) => http.put(`/devedores/${id}`, d).then((r) => r.data),
+  deleteDevedor: (id) => http.delete(`/devedores/${id}`).then((r) => r.data),
   // relatorio / backup
   relatorio: (mes) => http.get("/relatorio", { params: { mes } }).then((r) => r.data),
   backup: () => http.get("/backup").then((r) => r.data),
@@ -66,6 +71,7 @@ export const fmtData = (d) => {
 export const CIDADES = ["Bicas", "Mar de Espanha", "Pequeri", "Maripá de Minas", "Guarará", "Rochedo de Minas"];
 
 export const hoje = () => new Date().toLocaleDateString("sv-SE");
+export const diaMais = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toLocaleDateString("sv-SE"); };
 
 export const waLink = (tel, msg) => {
   const num = (tel || "").replace(/\D/g, "");
