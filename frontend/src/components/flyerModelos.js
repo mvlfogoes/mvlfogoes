@@ -139,3 +139,19 @@ export const MODELOS = {
     ),
   },
 };
+
+MODELOS.servico = {
+  ...MODELOS.agenda,
+  titulo: "AGENDAMENTO DE SERVIÇO",
+  modal: "Flyer de Agendamento de Serviço",
+  arquivo: "servico",
+  Body: (p) => (
+    <>
+      <ClienteRows {...p} />
+      <div style={destaque}><Field label="Data do serviço" k="data" testid="flyer-input-data" {...p} /><Field label="Horário" k="hora" testid="flyer-input-hora" {...p} /></div>
+      <Servicos {...p} />
+      <div style={row}><Field label="Serviço a realizar" k="servico" flex={1.4} testid="flyer-input-servico" {...p} /><Field label="Valor" k="taxa" testid="flyer-input-taxa" {...p} /></div>
+      <Texto label="Observações" k="obs" testid="flyer-input-obs" {...p} />
+    </>
+  ),
+};

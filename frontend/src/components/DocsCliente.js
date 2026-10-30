@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { FileText, CalendarCheck, Calculator, Receipt, Send, Download, Trash2, Printer } from "lucide-react";
+import { FileText, CalendarCheck, Calculator, Receipt, Send, Download, Trash2, Printer, Wrench } from "lucide-react";
 import { api, docUrl } from "@/lib/api";
 import { compartilhar, baixarBlob, imprimir } from "@/lib/media";
 import { Empty, SectionTitle } from "@/lib/ui";
 import { ZoomViewer } from "@/components/ZoomViewer";
 
-const TIPOS = { agenda: ["Visita", CalendarCheck], orcamento: ["Orçamento", Calculator], recibo: ["Recibo", Receipt] };
-const FILTROS = [["", "Todos"], ["agenda", "Visitas"], ["orcamento", "Orçamentos"], ["recibo", "Recibos"]];
+const TIPOS = { agenda: ["Visita", CalendarCheck], servico: ["Serviço", Wrench], orcamento: ["Orçamento", Calculator], recibo: ["Recibo", Receipt] };
+const FILTROS = [["", "Todos"], ["agenda", "Visitas"], ["servico", "Serviços"], ["orcamento", "Orçamentos"], ["recibo", "Recibos"]];
 const quando = (ts) => new Date(ts).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
 export function DocsCliente({ cli }) {

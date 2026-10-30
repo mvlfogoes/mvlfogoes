@@ -364,7 +364,7 @@ async def delete_foto(fid: str):
 
 
 # ---------------- Documentos (flyers guardados) ----------------
-DOC_TIPOS = {"agenda", "orcamento", "recibo"}
+DOC_TIPOS = {"agenda", "servico", "orcamento", "recibo"}
 
 
 @api_router.get("/documentos")

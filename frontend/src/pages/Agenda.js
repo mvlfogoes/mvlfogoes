@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Plus, ChevronLeft, ChevronRight, CheckCircle2, XCircle, Trash2, Pencil,
-  Bell, CalendarDays, List, MapPin, X, Calculator, Receipt,
+  Bell, CalendarDays, List, MapPin, X, Calculator, Receipt, Wrench,
 } from "lucide-react";
 import { api, fmtData, hoje, waLink, CIDADES } from "@/lib/api";
 import { salvarCliente } from "@/lib/clienteSync";
@@ -31,8 +31,8 @@ const PosSalvar = ({ pos, onClose, onFlyer }) => (
         <button onClick={onClose} data-testid="agenda-pos-close" className="p-1 text-zinc-400"><X size={20} /></button>
       </div>
       <p className="text-sm text-zinc-300">Abrir flyer para enviar ou imprimir:</p>
-      <div className="grid grid-cols-3 gap-2">
-        {[["agenda", "Visita", Bell], ["orcamento", "Orçamento", Calculator], ["recibo", "Recibo", Receipt]].map(([m, l, I]) => (
+      <div className="grid grid-cols-2 gap-2">
+        {[["agenda", "Visita", Bell], ["servico", "Serviço", Wrench], ["orcamento", "Orçamento", Calculator], ["recibo", "Recibo", Receipt]].map(([m, l, I]) => (
           <Btn key={m} variant="outline" onClick={() => onFlyer(m)} data-testid={`agenda-pos-${m}`} className="flex-col !py-3"><I size={18} /> {l}</Btn>
         ))}
       </div>

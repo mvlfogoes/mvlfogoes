@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, Send, MessageCircle, X, ImageIcon, ClipboardPaste, MapPin, Calculator, Receipt } from "lucide-react";
+import { Search, Send, MessageCircle, X, ImageIcon, ClipboardPaste, MapPin, Calculator, Receipt, Wrench } from "lucide-react";
 import { api, waLink, hoje } from "@/lib/api";
 import { inputCls, Empty, SectionTitle, Btn, Badge } from "@/lib/ui";
 import { useApp } from "@/App";
@@ -27,7 +27,8 @@ const ClienteSheet = ({ c, ag, onClose, onFlyer }) => (
       <a href={waLink(c.wa || c.tel, "")} target="_blank" rel="noreferrer" data-testid="wa-sheet-open-chat" className="block">
         <Btn variant="fire" className="w-full"><MessageCircle size={17} /> Abrir conversa no WhatsApp</Btn>
       </a>
-      <Btn variant="outline" className="w-full" onClick={() => onFlyer(false, "agenda")} data-testid="wa-sheet-send-flyer"><ImageIcon size={17} /> Enviar flyer</Btn>
+      <Btn variant="outline" className="w-full" onClick={() => onFlyer(false, "agenda")} data-testid="wa-sheet-send-flyer"><ImageIcon size={17} /> Agendamento de visita</Btn>
+      <Btn variant="outline" className="w-full" onClick={() => onFlyer(false, "servico")} data-testid="wa-sheet-servico"><Wrench size={17} /> Agendamento de serviço</Btn>
       <Btn variant="outline" className="w-full" onClick={() => onFlyer(true, "agenda")} data-testid="wa-sheet-flyer-from-chat"><ClipboardPaste size={17} /> Montar flyer com dados da conversa</Btn>
       <div className="grid grid-cols-2 gap-2">
         <Btn variant="outline" className="w-full" onClick={() => onFlyer(false, "orcamento")} data-testid="wa-sheet-orcamento"><Calculator size={17} /> Orçamento</Btn>
@@ -84,7 +85,7 @@ export default function WhatsAppCentral() {
         </div>
       )}
 
-      {sel && <ClienteSheet c={sel} ag={proxAg(agenda, sel)} onClose={() => setSel(null)} onFlyer={(colar, modelo) => { setFlyer({ cli: sel, ag: modelo === "agenda" ? proxAg(agenda, sel) : ultOS(ordens, sel), colar, modelo }); setSel(null); }} />}
+      {sel && <ClienteSheet c={sel} ag={proxAg(agenda, sel)} onClose={() => setSel(null)} onFlyer={(colar, modelo) => { setFlyer({ cli: sel, ag: modelo === "agenda" || modelo === "servico" ? proxAg(agenda, sel) : ultOS(ordens, sel), colar, modelo }); setSel(null); }} />}
       {flyer && <FlyerModal open colar={flyer.colar} modelo={flyer.modelo} onClose={() => setFlyer(null)} ag={flyer.ag} cli={flyer.cli} cfg={cfg} />}
     </div>
   );
